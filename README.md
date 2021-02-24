@@ -1,53 +1,32 @@
-# Template for Data Science Project
+# Monocular depth estimation
 
-This repo aims to give a robust starting point to any Data Science related project.
+Hi! In this repo we will try to solve monocular depth estimation problem for our autonomous selfdriving car ([Check it out!](https://evocargo.com/eng/)).
 
-It contains readymade tools setup to start adding dependencies and coding.
+All results would be introduced in our [paper](https://www.overleaf.com/read/hzvkhgckssjz) (view only).
 
-To get yourself familiar with tools used here watch [my talk on Data Science project setup (in Russian)](https://youtu.be/jLIAiDMyseQ)
+Don't forget to set your environment with [this guide](HOW_TO_SET_ENV.md).
 
-## What to change?
+In this repo we try to implement next networks for our task:
 
-* project name (default: `ds_project`)
-    * in `pyproject.toml` - tool.poetry.name
-    * main project directory (`ds_project`)
-    * test in `tests` directory
-* line length (default: `90`) [Why 90?](https://youtu.be/esZLCuWs_2Y?t=1287)
-    * in `pyproject.toml` in blocks
-        * black
-        * isort
-    * in `setup.cfg` for `flake8`
+1. lightweight networks such as:
+    * [AnyNet](https://arxiv.org/pdf/1810.11408v2.pdf)
 
-## How to setup an environment?
+    * [FastDepth](https://arxiv.org/pdf/1903.03273.pdf)
 
-This template use `poetry` to manage dependencies of your project. They 
+2. networks with unsupervised approach:
 
-First you need to [install poetry](https://python-poetry.org/docs/#installation).
+    * [MonoDepth2](https://arxiv.org/pdf/1806.01260.pdf)
 
-Then if you use `conda` (recommended) to manage environments (to use regular virtualenvenv just skip this step):
+    * [FeatDepth](https://arxiv.org/pdf/2007.10603v1.pdf)
 
-* tell `poetry` not to create new virtualenv for you
+    * [Struct2depth](https://arxiv.org/pdf/1906.05717.pdf)
 
-    (instead `poetry` will use currently activated virtualenv):
+3. networks with specific layers:
 
-    `poetry config virtualenvs.create false`
+    * [BTS](https://arxiv.org/pdf/1907.10326v5.pdf)
 
-* create new `conda` environment for your project (change env name for your desired one):
+    * [DORN](https://arxiv.org/pdf/1806.02446.pdf)
 
-    `conda create -n ds_project python=3.9`
+4. networks with transformers
 
-* actiave environment:
-
-    `conda activate ds_project`
-
-Now you are ready to add dependencies to your project. For this use [`add` command](https://python-poetry.org/docs/cli/#add):
-
-`poetry add scikit-learn torch <any_package_you_need>`
-
-Next run `poetry install` to check your final state are even with configs.
-
-After that commit changes to git and commit them `git add pyproject.toml poetry.lock`
-
-Finally add `pre-commit` hooks to git: `pre-commit install`
-
-At this step you are ready to write clean reproducible code!
+    * [AdaBins](https://arxiv.org/pdf/2011.14141v1.pdf)
