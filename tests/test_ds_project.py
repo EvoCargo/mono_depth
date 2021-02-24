@@ -1,4 +1,4 @@
-from ds_project import __version__
+from monocular_depth import __version__
 
 
 def test_version():

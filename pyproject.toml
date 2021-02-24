@@ -1,11 +1,21 @@
 [tool.poetry]
-name = "ds_project"
+name = "monocular_depthS"
 version = "0.1.0"
 description = "Template repository to start your Data Science project from"
 authors = ["Vladilav Goncharenko <vladislav.goncharenko@phystech.edu>"]
 
 [tool.poetry.dependencies]
 python = "^3.9"
+scikit-learn = "^0.24.1"
+torch = "^1.7.1"
+tensorboard = "^2.4.1"
+mlflow = "^1.14.0"
+matplotlib = "^3.3.4"
+imgaug = "^0.4.0"
+numpy = "^1.20.1"
+scipy = "^1.6.1"
+Pillow = "^8.1.0"
+cv = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
