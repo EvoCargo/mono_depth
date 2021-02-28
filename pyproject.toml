@@ -24,7 +24,7 @@ dvc = "^1.11.16"
 
 [tool.black]
 line-length = 90
-target-version = ["py39"]
+target-version = ["py38"]
 skip-string-normalization = true
 
 [tool.isort]
