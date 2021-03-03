@@ -16,6 +16,7 @@ numpy = "^1.20.1"
 scipy = "^1.6.1"
 Pillow = "^8.1.0"
 cv = "^1.0.0"
+jupyter = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
@@ -24,7 +25,7 @@ dvc = "^1.11.16"
 
 [tool.black]
 line-length = 90
-target-version = ["py39"]
+target-version = ["py38"]
 skip-string-normalization = true
 
 [tool.isort]
