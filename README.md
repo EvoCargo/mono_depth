@@ -8,25 +8,24 @@ Don't forget to set your environment with [this guide](HOW_TO_SET_ENV.md).
 
 In this repo we try to implement next networks for our task:
 
-1. lightweight networks such as:
-    * [AnyNet](https://arxiv.org/pdf/1810.11408v2.pdf)
+1. lightweight:
 
-    * [FastDepth](https://arxiv.org/pdf/1903.03273.pdf)
+    * FastDepth [paper](https://arxiv.org/pdf/1903.03273.pdf) [code](https://github.com/dwofk/fast-depth)
 
 2. networks with unsupervised approach:
 
-    * [MonoDepth2](https://arxiv.org/pdf/1806.01260.pdf)
+    * MonoDepth2 [paper](https://arxiv.org/pdf/1806.01260.pdf) [code](https://github.com/nianticlabs/monodepth2)
 
-    * [FeatDepth](https://arxiv.org/pdf/2007.10603v1.pdf)
-
-    * [Struct2depth](https://arxiv.org/pdf/1906.05717.pdf)
+    * FeatDepth [paper](https://arxiv.org/pdf/2007.10603v1.pdf) [code](https://github.com/sconlyshootery/FeatDepth)
 
 3. networks with specific layers:
 
-    * [BTS](https://arxiv.org/pdf/1907.10326v5.pdf)
+    * BTS [paper](https://arxiv.org/pdf/1907.10326v5.pdf) [code](https://github.com/cogaplex-bts/bts)
 
-    * [DORN](https://arxiv.org/pdf/1806.02446.pdf)
+    * DORN [paper](https://arxiv.org/pdf/1806.02446.pdf) [code](https://github.com/dontLoveBugs/SupervisedDepthPrediction)
 
-4. networks with transformers
+4. SOTA networks:
 
-    * [AdaBins](https://arxiv.org/pdf/2011.14141v1.pdf)
+    * AdaBins [paper](https://arxiv.org/pdf/2011.14141v1.pdf) [code](https://github.com/shariqfarooq123/AdaBins)
+
+    * ViP-DeepLab [paper](https://arxiv.org/pdf/2012.05258.pdf) [code](https://github.com/joe-siyuan-qiao/ViP-DeepLab)
