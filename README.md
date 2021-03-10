@@ -1,4 +1,4 @@
-# Monocular depth estimation
+# Monocular depth estimation 🔍
 
 Hi! In this repo we will try to solve monocular depth estimation problem for our autonomous selfdriving car ([Check it out!](https://evocargo.com/eng/)).
 
@@ -26,7 +26,33 @@ In this repo we try to implement next networks for our task:
 
     * AdaBins [[paper](https://arxiv.org/pdf/2011.14141v1.pdf)] [[code](https://github.com/shariqfarooq123/AdaBins)]
 
-# Train
+# Datasets
+
+There are 3 datasets available for our task:
+
+* [KITTI](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_prediction)
+
+* [CityScapes](https://www.cityscapes-dataset.com/downloads/)
+
+* Our own
+
+# Train 🚂
+
+You can train any network with one command:
+
+```bash
+python train.py --nn adabins --train_dir /path/to/dir --pretrained kitti --config config_file.txt
+```
+where
+
+* `nn` is one of introduced networks;
+
+* `train_dir` is directory with training and ground truth data;
+
+* `pretrained` is flag to use one of pretrained models;
+
+* `config` is file with specific configs for specific network.
+
 
 All pretrained models are [here](https://drive.google.com/drive/folders/184grgoiV4IqAgJ_M0_Fkk9FB_v975RSq?usp=sharing).
 
@@ -34,7 +60,7 @@ Here is the table of pretrains which you can use in train script with `--pretrai
 
 Network | Model | Description
 --- | --- | ---
-Adabins | [model](https://drive.google.com/u/0/uc?export=download&confirm=bS7j&id=15NEu5bjOn2ABseVpHVgOpDRpjhsb626m) | Model pretrained on KITTI data
+Adabins | [kitti](https://drive.google.com/u/0/uc?export=download&confirm=bS7j&id=15NEu5bjOn2ABseVpHVgOpDRpjhsb626m) | Model pretrained on KITTI data
 FastDepth | [imagenet](https://drive.google.com/u/0/uc?id=1aqHzLwSLDqCIDtAvqEvOStivv2oX5Tgm&export=download) | Best model introduced by authors
 FastDepth | [mobilenet-nnconv5](https://drive.google.com/u/0/uc?export=download&confirm=uE58&id=1k3D5sr88LwMMRyfSfSAA2EyjOi57U5GT) | Model with pretrained MobileNet
 FastDepth | [mobilenet-nnconv5-dw](https://drive.google.com/u/0/uc?id=12n25k8e5qF4l61Wgw5Fw788a4ROA4azy&export=download) | Model with pretrained MobileNet as encoder and smth else
@@ -65,18 +91,18 @@ MonoDepth2 | [mono+stereo_odom_640x192](https://drive.google.com/u/0/uc?export=d
 MonoDepth2 | [mono_resnet50_640x192](https://drive.google.com/u/0/uc?export=download&confirm=B8hW&id=1fwWnoHNhippOPKvAs0Wv3L1vzliJyYBj) | U know
 MonoDepth2 | [mono_resnet50_no_pt_640x192](https://drive.google.com/u/0/uc?export=download&confirm=vMBg&id=1se52I8K5cyEuB_vXtMmGJFkwlTHYywRH) | U know
 
+# Test 🏁
 
+You can test model on your data. It can be one image (**PNG ONLY**) or directory (**STILL PNG**).
 
-
-You can train any network with one command:
+To test network on image use next syntax:
 
 ```bash
-python train.py --nn adabins --pretrained imagenet --train_dir /path/to/dir
+python test.py --model_path /path/to/model.h5 --img /path/to/img.png
 ```
 
-
-# Evaluate
+To test network on dir of iamges use next syntax:
 
 ```bash
-python eval.py
+python test.py --model_path /path/to/model.h5 -dir /path/to/dir
 ```
