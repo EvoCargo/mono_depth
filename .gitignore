@@ -133,9 +133,11 @@ dmypy.json
 
 # Files-lists for downloads datasets
 *.txt
+*.list
 
 # Big files
 *.npy
 
 # Pictures
 *.png
+*.gif
