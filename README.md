@@ -53,6 +53,7 @@ where
 
 * `config` is file with specific configs for specific network.
 
+Detailed information about each model is available in its folder in [src](./src).
 
 All pretrained models are [here](https://drive.google.com/drive/folders/184grgoiV4IqAgJ_M0_Fkk9FB_v975RSq?usp=sharing).
 
@@ -106,3 +107,16 @@ To test network on dir of iamges use next syntax:
 ```bash
 python test.py --model_path /path/to/model.h5 -dir /path/to/dir
 ```
+
+# Perfomance 📊
+
+Here we compare results
+
+Network | Modification | Inference time | RAM consumption
+--- | --- | --- | ---
+Adabins | NaN | NaN | NaN
+BTS | NaN | NaN | NaN
+DORN | NaN | NaN | NaN | NaN
+FastDepth | NaN | NaN | NaN
+FeatDepth | NaN | NaN | NaN
+Monodepth2 | NaN | NaN | NaN
