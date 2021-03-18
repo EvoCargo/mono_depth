@@ -108,11 +108,24 @@ To test network on dir of iamges use next syntax:
 python test.py --model_path /path/to/model.h5 -dir /path/to/dir
 ```
 
-# Perfomance 📊
+# Perfomance ⚙️
+
+Here we compare perfomance and consumptions of our networks
+
+Network | Modification | Inference time | RAM consumption
+--- | --- | --- | ---
+Adabins | NaN | NaN | NaN
+BTS | NaN | NaN | NaN
+DORN | NaN | NaN | NaN | NaN
+FastDepth | NaN | NaN | NaN
+FeatDepth | NaN | NaN | NaN
+Monodepth2 | NaN | NaN | NaN
+
+# Results 📊
 
 Here we compare results
 
-Network | Modification | Inference time | RAM consumption
+Network | Modification | Accuracy | MAE
 --- | --- | --- | ---
 Adabins | NaN | NaN | NaN
 BTS | NaN | NaN | NaN
