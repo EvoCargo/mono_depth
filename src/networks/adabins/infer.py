@@ -1,16 +1,18 @@
+import argparse
 import glob
 import os
+from time import time
 
+import matplotlib.pyplot as plt
 import model_io
 import numpy as np
 import torch
 import torch.nn as nn
+import utils
 from models import UnetAdaptiveBins
 from PIL import Image
 from torchvision import transforms
 from tqdm import tqdm
-
-import utils
 
 
 def _is_pil_image(img):
@@ -19,6 +21,14 @@ def _is_pil_image(img):
 
 def _is_numpy_image(img):
     return isinstance(img, np.ndarray) and (img.ndim in {2, 3})
+
+
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--image', '-i', required=True, help='image path')
+    parser.add_argument('--model', '-m', required=True, help='model path')
+    args = parser.parse_args()
+    return args
 
 
 class ToTensor(object):
@@ -67,28 +77,20 @@ class ToTensor(object):
 
 
 class InferenceHelper:
-    def __init__(self, dataset='nyu', device='cuda:0'):
+    def __init__(self, pretrained_path, dataset='kitti', device='cuda:0'):
         self.toTensor = ToTensor()
         self.device = device
-        if dataset == 'nyu':
-            self.min_depth = 1e-3
-            self.max_depth = 10
-            self.saving_factor = 1000  # used to save in 16 bit
-            model = UnetAdaptiveBins.build(
-                n_bins=256, min_val=self.min_depth, max_val=self.max_depth
-            )
-            pretrained_path = "./pretrained/AdaBins_nyu.pt"
-        elif dataset == 'kitti':
+        if dataset == 'kitti':
             self.min_depth = 1e-3
             self.max_depth = 80
             self.saving_factor = 256
             model = UnetAdaptiveBins.build(
                 n_bins=256, min_val=self.min_depth, max_val=self.max_depth
             )
-            pretrained_path = "./pretrained/AdaBins_kitti.pt"
+            # pretrained_path = "./pretrained/AdaBins_kitti.pt"
         else:
             raise ValueError(
-                "dataset can be either 'nyu' or 'kitti' but got {}".format(dataset)
+                "dataset can be either 'kitti' or  but got {}".format(dataset)
             )
 
         model, _, _ = model_io.load_checkpoint(pretrained_path, model)
@@ -168,15 +170,15 @@ class InferenceHelper:
             Image.fromarray(final).save(save_path)
 
 
-if __name__ == '__main__':
-    from time import time
-
-    import matplotlib.pyplot as plt
-
-    img = Image.open("test_imgs/classroom__rgb_00283.jpg")
+def main(image, model, **args):
+    img = Image.open(image)
     start = time()
-    inferHelper = InferenceHelper()
+    inferHelper = InferenceHelper(pretrained_path=model)
     centers, pred = inferHelper.predict_pil(img)
     print(f"took :{time() - start}s")
     plt.imshow(pred.squeeze(), cmap='magma_r')
     plt.show()
+
+
+if __name__ == '__main__':
+    main(**vars(parse_args))

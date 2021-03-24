@@ -141,3 +141,8 @@ dmypy.json
 # Pictures
 *.png
 *.gif
+*.jpg
+*.jpeg
+
+# Pretrained models
+pretrained/

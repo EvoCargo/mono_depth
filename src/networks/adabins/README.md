@@ -1,5 +1,13 @@
 # AdaBins
 
+## Pretrained
+
+Download pretrained model with `download_model.py` in root
+
+```
+python download_model.py --network adabins --model kitti
+```
+
 ## Inference
 Move the downloaded weights to a directory of your choice (we will use "./pretrained/" here). You can then use the pretrained models like so:
 
