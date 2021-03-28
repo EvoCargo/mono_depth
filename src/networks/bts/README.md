@@ -101,3 +101,6 @@ Simply change the argument `--encoder` in arguments_train_*.txt with your choice
 
 
 Note: Modify arguments `--encoder`, `--model_name`, `--checkpoint_path` and `--pred_path` accordingly.
+
+
+python ./src/networks/bts/model/bts_test.py --encoder densenet121 --dataset kitti --data_path autosave.png --checkpoint_path ./src/networks/bts/pretrained/densenet121/densenet121/bts_eigen_v2_pytorch_densenet121/model --filenames_file ./src/networks/bts/train_test_inputs/eigen_test_files_with_gt.txt

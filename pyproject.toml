@@ -7,7 +7,8 @@ authors = ["Vladilav Goncharenko <vladislav.goncharenko@phystech.edu>"]
 [tool.poetry.dependencies]
 python = "^3.9"
 scikit-learn = "^0.24.1"
-torch = "^1.7.1"
+torch = {url = "https://download.pytorch.org/whl/cu102/torch-1.8.0-cp38-cp38-linux_x86_64.whl"}
+torchvision = {url = "https://download.pytorch.org/whl/cu102/torchvision-0.9.0-cp39-cp39-linux_x86_64.whl"}
 tensorboard = "^2.4.1"
 mlflow = "^1.14.0"
 matplotlib = "^3.3.4"

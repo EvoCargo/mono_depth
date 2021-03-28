@@ -111,7 +111,7 @@ def main(**args):
         args['network'], args['model'], args['model']
     )
 
-    if args['network'] not in ['adabins', 'bts', 'monodepth2']:
+    if args['network'] not in ['bts', 'monodepth2']:
         destination += 'pth'
         download_file_from_google_drive(file_id, destination)
     else:

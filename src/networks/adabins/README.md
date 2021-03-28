@@ -56,3 +56,9 @@ bin_centers, predicted_depth = infer_helper.predict_pil(img)
 infer_helper.predict_dir("/path/to/input/dir/containing_only_images/", "path/to/output/dir/")
 
 ```
+
+А вообще было бы неплохо завести через
+
+```bash
+python infer.py --model ./pretrained/kitti/kitti.pth --image /path/to/image
+```

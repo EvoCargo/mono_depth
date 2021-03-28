@@ -181,4 +181,4 @@ def main(image, model, **args):
 
 
 if __name__ == '__main__':
-    main(**vars(parse_args))
+    main(**vars(parse_args()))
