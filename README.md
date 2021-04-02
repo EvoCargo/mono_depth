@@ -59,6 +59,14 @@ All pretrained models are [here](https://drive.google.com/drive/folders/184grgoi
 
 Here is the table of pretrains which you can use in train script with `--pretrained` arg.
 
+All this pretrains you can download via
+
+```bash
+python download_model.py --network monodepth2 --model mono_640x192
+```
+
+__PLEASE__ use this sript from root dir!!!
+
 Network | Model | Description
 --- | --- | ---
 Adabins | [kitti](https://drive.google.com/u/0/uc?export=download&confirm=l0dw&id=15dE5uF7lG__lx8H8fXaZBymOC041QTEQ) | Model pretrained on KITTI data
@@ -76,8 +84,8 @@ FastDepth | [mobilenet-nnconv5-dw-sc](https://drive.google.com/u/0/uc?id=1dB6J6x
 FastDepth | [mobilenet-nnconv5-dw-sc-pn](https://drive.google.com/u/0/uc?id=1G2ZyS63FMwR9uX-criPC0IVDLYSfW6xK&export=download) | Model with pretrained MobileNet as encoder, smth else, skip-connections and pruned
 FeatDepth | [autoencoder](https://drive.google.com/u/0/uc?export=download&confirm=i2Xd&id=1TZ-piXUlLfJhiN-OUC-sDoICUXlzXknn) | Autoencoder trained on the kitti raw data
 FeatDepth | [depth_odom](https://drive.google.com/u/0/uc?export=download&confirm=KRD3&id=1rsZ7SgjNEmwEXufKh8PAlooZ5gNTEKsX) | Model pretrained on KITTI odometry data
-FeatDepth | [depth_refine](https://drive.google.com/u/0/uc?export=download&confirm=t9pL&id=1vIh9NnwvgsnMyjHLsSbLhbvtgSIHalZz) |
-FeatDepth | [depth](https://drive.google.com/u/0/uc?export=download&confirm=ogKI&id=1EQdJAF6Ew64_kFGmKwKMP2r7wnKnJuWn) | Unknown
+FeatDepth | [depth_refine](https://drive.google.com/u/0/uc?export=download&confirm=t9pL&id=1vIh9NnwvgsnMyjHLsSbLhbvtgSIHalZz) | Model finetuned on test split of KITTI by online refinement
+FeatDepth | [depth](https://drive.google.com/u/0/uc?export=download&confirm=ogKI&id=1EQdJAF6Ew64_kFGmKwKMP2r7wnKnJuWn) | Model trained on KITTI
 MonoDepth2 | [mono_640x192](https://drive.google.com/u/0/uc?export=download&confirm=hlYX&id=1gVv4kb1_9H_boQAVTd3BzFmWxzbivS6P) | Imagenet pretrained model with resolution 640x192 and mono as source
 MonoDepth2 | [stereo_640x192](https://drive.google.com/u/0/uc?export=download&confirm=neJi&id=1-aWu7lKQRNnygr3vAta8-vZx_ahYExlI) | Imagenet pretrained model with resolution 640x192 and stereo as source
 MonoDepth2 | [mono+stereo_640x192](https://drive.google.com/u/0/uc?export=download&confirm=MTKo&id=1DziaSK4oT01D2ug038JvfkJIUIOLcbt8) | Imagenet pretrained model with resolution 640x192 and mono and stereo as source
@@ -91,8 +99,6 @@ MonoDepth2 | [mono_odom_640x192](https://drive.google.com/u/0/uc?export=download
 MonoDepth2 | [mono+stereo_odom_640x192](https://drive.google.com/u/0/uc?export=download&confirm=s2NN&id=1RzwNhlecp7nPx_ul992GRhLw58ammRkg) | Model with resolution 640x192 and mono and stereo as source trained on odometry
 MonoDepth2 | [mono_resnet50_640x192](https://drive.google.com/u/0/uc?export=download&confirm=B8hW&id=1fwWnoHNhippOPKvAs0Wv3L1vzliJyYBj) | Model with resolution 640x192 and mono as source on resnet50 with Imagenet
 MonoDepth2 | [mono_resnet50_no_pt_640x192](https://drive.google.com/u/0/uc?export=download&confirm=vMBg&id=1se52I8K5cyEuB_vXtMmGJFkwlTHYywRH) | Model with resolution 640x192 and mono and stereo as source on resnet50 without Imagenet
-
-All this pretrains you can download with `download_model.py`.
 
 # Test 🏁
 
