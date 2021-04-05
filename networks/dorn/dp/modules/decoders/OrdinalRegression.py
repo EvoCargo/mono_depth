@@ -1,11 +1,5 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""
-@Time    : 2020-05-02 17:55
-@Author  : Wang Xin
-@Email   : wangxin_buaa@163.com
-@File    : oridinal_regression_layer.py
-"""
 
 import torch
 import torch.nn as nn

@@ -1,11 +1,5 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""
-@Time    : 2020-05-02 18:33
-@Author  : Wang Xin
-@Email   : wangxin_buaa@163.com
-@File    : dorn.py
-"""
 import numpy as np
 from dp.utils.pyt_ops import interpolate, tensor2numpy
 from dp.visualizers.base_visualizer import BaseVisualizer

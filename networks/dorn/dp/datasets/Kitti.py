@@ -1,12 +1,5 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""
-@Time    : 2020-05-02 22:28
-@Author  : Wang Xin
-@Email   : wangxin_buaa@163.com
-@File    : Kitti.py
-"""
-
 import math
 import os
 import random

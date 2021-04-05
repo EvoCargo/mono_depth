@@ -60,7 +60,6 @@ net2model = {
     },
     'dorn': {'resnet': '1pOHRZB6a0IJUE3cFzPWYrSMA0UgIfQmQ'},
     'fastdepth': {
-        'imagenet': '1aqHzLwSLDqCIDtAvqEvOStivv2oX5Tgm',
         'mobilenet-nnconv5': '1k3D5sr88LwMMRyfSfSAA2EyjOi57U5GT',
         'mobilenet-nnconv5-dw': '12n25k8e5qF4l61Wgw5Fw788a4ROA4azy',
         'mobilenet-nnconv5-dw-sc': '1dB6J6x_vrsDo4-M1fO5HxO8Z0sgUFcpN',
@@ -101,13 +100,13 @@ def main(**args):
         raise Exception
 
     file_id = net2model[args['network']][args['model']]
-    if not os.path.exists('./networks/{}/pretrained'.format(args['network'])):
-        os.mkdir('./networks/{}/pretrained'.format(args['network']))
-    os.mkdir('./networks/{}/pretrained/{}'.format(args['network'], args['model']))
+    if not os.path.exists('networks/{}/pretrained'.format(args['network'])):
+        os.mkdir('networks/{}/pretrained'.format(args['network']))
+    os.mkdir('networks/{}/pretrained/{}'.format(args['network'], args['model']))
 
     file_id = net2model[args['network']][args['model']]
 
-    destination = './networks/{}/pretrained/{}/{}.'.format(
+    destination = 'networks/{}/pretrained/{}/{}.'.format(
         args['network'], args['model'], args['model']
     )
 
@@ -119,7 +118,7 @@ def main(**args):
         download_file_from_google_drive(file_id, destination)
         with zipfile.ZipFile(destination, 'r') as zip_ref:
             zip_ref.extractall(
-                './networks/{}/pretrained/{}/.'.format(args['network'], args['model'])
+                '/networks/{}/pretrained/{}/.'.format(args['network'], args['model'])
             )
         os.remove(destination)
 

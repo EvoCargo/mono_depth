@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Time    : 2020/1/1 下午8:08
-# @Author  : Wang Xin
-# @Email   : wangxin_buaa@163.com
-# @File    : prob.py
 
 import os
 

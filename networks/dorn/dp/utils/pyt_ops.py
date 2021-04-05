@@ -1,12 +1,5 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""
-@Time    : 2020-04-03 20:27
-@Author  : Wang Xin
-@Email   : wangxin_buaa@163.com
-@File    : pyt_ops.py
-"""
-
 import numpy as np
 import torch
 import torch.nn.functional as F

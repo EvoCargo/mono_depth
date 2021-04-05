@@ -1,12 +1,5 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""
-@Time    : 2020-05-02 18:17
-@Author  : Wang Xin
-@Email   : wangxin_buaa@163.com
-@File    : ordinal_regression_loss.py
-"""
-
 import numpy as np
 import torch
 import torch.nn.functional as F

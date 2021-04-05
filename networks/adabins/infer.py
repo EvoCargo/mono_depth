@@ -27,8 +27,8 @@ def _is_numpy_image(img):
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--image', '-i', required=True, help='image path')
-    parser.add_argument('--model', '-m', required=True, help='model path')
+    parser.add_argument('--image', '-i', required=True, help='image path (.jpg or .png')
+    parser.add_argument('--model', '-m', required=True, help='model path (.pth)')
     args = parser.parse_args()
     return args
 

@@ -1,11 +1,5 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""
-@Time    : 2019-12-24 22:21
-@Author  : Wang Xin
-@Email   : wangxin_buaa@163.com
-@File    : pyt_ops.py
-"""
 
 from __future__ import division, print_function
 

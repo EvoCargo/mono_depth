@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Time    : 2020/1/7 下午7:05
-# @Author  : Wang Xin
-# @Email   : wangxin_buaa@163.com
-# @File    : pyt_io.py
 
 import logging
 import os

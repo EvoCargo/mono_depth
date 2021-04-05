@@ -77,7 +77,6 @@ BTS | [resnet101](https://drive.google.com/u/0/uc?export=download&confirm=EbdG&i
 BTS | [resnext50](https://drive.google.com/u/0/uc?export=download&confirm=WXub&id=1IR3sONAj3lbPajbor3hjOZ8hvlyvtWzt) | Model with resnext50 backbone
 BTS | [resnext101](https://drive.google.com/u/0/uc?export=download&confirm=A1bl&id=1Lf-FcJwE-A51XtwcqAZs3ja4OG0pn6-n) | Model with resnext101 backbone
 DORN | [resnet](https://drive.google.com/u/0/uc?export=download&confirm=7bQE&id=1pOHRZB6a0IJUE3cFzPWYrSMA0UgIfQmQ) | Model with pretrained Resnet
-FastDepth | [imagenet](https://drive.google.com/u/0/uc?id=1aqHzLwSLDqCIDtAvqEvOStivv2oX5Tgm&export=download) | Best model introduced by authors
 FastDepth | [mobilenet-nnconv5](https://drive.google.com/u/0/uc?export=download&confirm=uE58&id=1k3D5sr88LwMMRyfSfSAA2EyjOi57U5GT) | Model with pretrained MobileNet
 FastDepth | [mobilenet-nnconv5-dw](https://drive.google.com/u/0/uc?id=12n25k8e5qF4l61Wgw5Fw788a4ROA4azy&export=download) | Model with pretrained MobileNet as encoder and smth else
 FastDepth | [mobilenet-nnconv5-dw-sc](https://drive.google.com/u/0/uc?id=1dB6J6x_vrsDo4-M1fO5HxO8Z0sgUFcpN&export=download) | Model with pretrained MobileNet as encoder, smth else and skip-connections
@@ -147,3 +146,5 @@ Monodepth2 | NaN | NaN | NaN
 * Requirements for each network
 
 * .txt files download script (if needed)
+
+* Make inference for networks

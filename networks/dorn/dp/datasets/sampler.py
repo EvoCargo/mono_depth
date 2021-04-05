@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Time    : 2020/1/3 下午4:42
-# @Author  : Wang Xin
-# @Email   : wangxin_buaa@163.com
-# @File    : sampler.py
-
 
 import math
 

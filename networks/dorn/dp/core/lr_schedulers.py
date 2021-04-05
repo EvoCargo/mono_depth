@@ -1,11 +1,5 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""
-@Time    : 2020-05-05 00:33
-@Author  : Wang Xin
-@Email   : wangxin_buaa@163.com
-@File    : lr_schedular.py
-"""
 
 import math
 import types

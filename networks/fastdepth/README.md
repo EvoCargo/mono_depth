@@ -13,6 +13,14 @@
 
 Parameters
 
+## Inference
+
+Инференс заводится через
+
+```bash
+python test.py --image /path/to/image --model ./pretrained/mobilenet-nnconv5/mobilenet-nnconv5.pth
+```
+
 ## Evaluation
 
 This step requires a valid PyTorch installation and a saved copy of the NYU Depth v2 dataset. It is meant to be performed on a host machine with a CUDA GPU, not on an embedded platform. Deployment on an embedded device is discussed in the [next section](#deployment).

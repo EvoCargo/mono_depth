@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Time    : 2019/12/28 下午11:41
-# @Author  : Wang Xin
-# @Email   : wangxin_buaa@163.com
-# @File    : comm.py
 
 """
 This file contains primitives for multi-gpu communication.

@@ -1,11 +1,5 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""
-@Time    : 2020-04-02 11:42
-@Author  : Wang Xin
-@Email   : wangxin_buaa@163.com
-@File    : base_visualizer.py
-"""
 
 
 class BaseVisualizer(object):

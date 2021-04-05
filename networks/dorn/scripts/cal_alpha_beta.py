@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
- @Time    : 2018/11/25 11:15
- @Author  : Wang Xin
- @Email   : wangxin_buaa@163.com
-"""
 import os
 
 import numpy as np

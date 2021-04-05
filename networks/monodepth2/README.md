@@ -16,11 +16,11 @@ We have also successfully trained models with PyTorch 1.0, and our code is compa
 We also recommend using `pillow-simd` instead of `pillow` for faster image preprocessing in the dataloaders. -->
 
 
-## 🖼️ Prediction for a single image
+## Inference
 
 You can predict depth for a single image with:
 ```bash
-python test_simple.py --image_path assets/test_image.jpg --model mono+stereo_640x192
+python test_simple.py --image assets/test_image.jpg --model pretrained/mono_640x192
 ```
 
 On its first run this will download the `mono+stereo_640x192` pretrained model (99MB) into the `models/` folder.

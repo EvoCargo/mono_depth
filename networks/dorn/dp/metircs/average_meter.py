@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Time    : 2019/12/26 下午4:09
-# @Author  : Wang Xin
-# @Email   : wangxin_buaa@163.com
-# @File    : average_meter.py
-
-
 import copy
 
 import numpy as np

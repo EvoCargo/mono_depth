@@ -1,11 +1,5 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-"""
-@Time    : 2020-05-02 21:06
-@Author  : Wang Xin
-@Email   : wangxin_buaa@163.com
-@File    : dorn.py
-"""
 
 import numpy as np
 import torch

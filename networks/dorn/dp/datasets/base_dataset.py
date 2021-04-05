@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Time    : 2019/12/25 下午5:09
-# @Author  : Wang Xin
-# @Email   : wangxin_buaa@163.com
-# @File    : base_dataset.py
 
 # import os
 

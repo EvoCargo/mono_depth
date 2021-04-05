@@ -32,28 +32,9 @@ def parse_args():
         description='Simple testing funtion for Monodepthv2 models.'
     )
 
-    parser.add_argument(
-        '--image_path',
-        type=str,
-        help='path to a test image or folder of images',
-        required=True,
-    )
-    parser.add_argument(
-        '--model',
-        type=str,
-        help='name of a pretrained model to use',
-        choices=[
-            "mono_640x192",
-            "stereo_640x192",
-            "mono+stereo_640x192",
-            "mono_no_pt_640x192",
-            "stereo_no_pt_640x192",
-            "mono+stereo_no_pt_640x192",
-            "mono_1024x320",
-            "stereo_1024x320",
-            "mono+stereo_1024x320",
-        ],
-    )
+    parser.add_argument('--image', '-i', required=True, help='image path (.jpg or .png')
+    parser.add_argument('--model', '-m', required=True, help='model path (dir with .pth)')
+
     parser.add_argument(
         '--ext', type=str, help='image extension to search for in folder', default="jpg"
     )
@@ -64,9 +45,6 @@ def parse_args():
 
 def test_simple(args):
     """Function to predict for a single image or folder of images"""
-    assert (
-        args.model is not None
-    ), "You must specify the --model parameter; see README.md for an example"
 
     if torch.cuda.is_available() and not args.no_cuda:
         device = torch.device("cuda")
@@ -74,10 +52,10 @@ def test_simple(args):
         device = torch.device("cpu")
 
     # download_model_if_doesnt_exist(args.model)
-    model_path = os.path.join("pretrained", args.model)
-    print("-> Loading model from ", model_path)
-    encoder_path = os.path.join(model_path, "encoder.pth")
-    depth_decoder_path = os.path.join(model_path, "depth.pth")
+    # model_path = os.path.join("pretrained", args.model)
+    print("-> Loading model from ", args.model)
+    encoder_path = os.path.join(args.model, "encoder.pth")
+    depth_decoder_path = os.path.join(args.model, "depth.pth")
 
     # LOADING PRETRAINED MODEL
     print("   Loading pretrained encoder")
@@ -104,29 +82,29 @@ def test_simple(args):
     depth_decoder.eval()
 
     # FINDING INPUT IMAGES
-    if os.path.isfile(args.image_path):
+    if os.path.isfile(args.image):
         # Only testing on a single image
-        paths = [args.image_path]
-        output_directory = os.path.dirname(args.image_path)
-    elif os.path.isdir(args.image_path):
+        paths = [args.image]
+        output_directory = os.path.dirname(args.image)
+    elif os.path.isdir(args.image):
         # Searching folder for images
-        paths = glob.glob(os.path.join(args.image_path, '*.{}'.format(args.ext)))
-        output_directory = args.image_path
+        paths = glob.glob(os.path.join(args.image, '*.{}'.format(args.ext)))
+        output_directory = args.image
     else:
-        raise Exception("Can not find args.image_path: {}".format(args.image_path))
+        raise Exception("Can not find args.image: {}".format(args.image))
 
     print("-> Predicting on {:d} test images".format(len(paths)))
 
     # PREDICTING ON EACH IMAGE IN TURN
     with torch.no_grad():
-        for idx, image_path in enumerate(paths):
+        for idx, image in enumerate(paths):
 
-            if image_path.endswith("_disp.jpg"):
+            if image.endswith("_disp.jpg"):
                 # don't try to predict disparity for a disparity image!
                 continue
 
             # Load image and preprocess
-            input_image = pil.open(image_path).convert('RGB')
+            input_image = pil.open(image).convert('RGB')
             original_width, original_height = input_image.size
             input_image = input_image.resize((feed_width, feed_height), pil.LANCZOS)
             input_image = transforms.ToTensor()(input_image).unsqueeze(0)
@@ -145,7 +123,7 @@ def test_simple(args):
             )
 
             # Saving numpy file
-            output_name = os.path.splitext(os.path.basename(image_path))[0]
+            output_name = os.path.splitext(os.path.basename(image))[0]
             name_dest_npy = os.path.join(
                 output_directory, "{}_disp.npy".format(output_name)
             )
@@ -177,5 +155,4 @@ def test_simple(args):
 
 
 if __name__ == '__main__':
-    args = parse_args()
-    test_simple(args)
+    test_simple(parse_args())
