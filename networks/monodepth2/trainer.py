@@ -1,9 +1,3 @@
-# Copyright Niantic 2019. Patent Pending. All rights reserved.
-#
-# This software is licensed under the terms of the Monodepth2 licence
-# which allows for non-commercial use only, the full terms of which are made
-# available in the LICENSE file.
-
 from __future__ import absolute_import, division, print_function
 
 import json
@@ -15,9 +9,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-
-# from IPython import embed
-from kitti_utils import readlines
 from layers import (
     SSIM,
     BackprojectDepth,
@@ -29,10 +20,14 @@ from layers import (
 )
 from tensorboardX import SummaryWriter
 from torch.utils.data import DataLoader
-from utils import normalize_image, sec_to_hm_str
+from utils import normalize_image, readlines, sec_to_hm_str
 
 import datasets
 import networks
+
+
+# from IPython import embed
+# from kitti_utils import
 
 
 class Trainer:
@@ -137,6 +132,8 @@ class Trainer:
         datasets_dict = {
             "kitti": datasets.KITTIRAWDataset,
             "kitti_odom": datasets.KITTIOdomDataset,
+            'kitti_depth': datasets.KITTIDepthDataset,
+            'evo': datasets.EvoDataset,
         }
         self.dataset = datasets_dict[self.opt.dataset]
 
@@ -145,6 +142,8 @@ class Trainer:
         )
 
         train_filenames = readlines(fpath.format("train"))
+
+        # print(train_filenames[:10])
         val_filenames = readlines(fpath.format("val"))
         img_ext = '.png' if self.opt.png else '.jpg'
 
@@ -153,7 +152,10 @@ class Trainer:
             num_train_samples // self.opt.batch_size * self.opt.num_epochs
         )
 
+        # print('Frame_ids: ', self.opt.frame_ids)
+
         train_dataset = self.dataset(
+            self.opt.dataset,
             self.opt.data_path,
             train_filenames,
             self.opt.height,
@@ -172,6 +174,7 @@ class Trainer:
             drop_last=True,
         )
         val_dataset = self.dataset(
+            self.opt.dataset,
             self.opt.data_path,
             val_filenames,
             self.opt.height,
@@ -400,7 +403,9 @@ class Trainer:
                 self.compute_depth_losses(inputs, outputs, losses)
 
             self.log("val", inputs, outputs, losses)
-            del inputs, outputs, losses
+            del inputs
+            del outputs
+            del losses
 
         self.set_train()
 

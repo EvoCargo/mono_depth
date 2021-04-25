@@ -1,1 +1,6 @@
-from .kitti_dataset import KITTIDepthDataset, KITTIOdomDataset, KITTIRAWDataset  # noqa
+from .kitti_dataset import (  # noqa
+    EvoDataset,
+    KITTIDepthDataset,
+    KITTIOdomDataset,
+    KITTIRAWDataset,
+)

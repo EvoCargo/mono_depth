@@ -1,9 +1,3 @@
-# Copyright Niantic 2019. Patent Pending. All rights reserved.
-#
-# This software is licensed under the terms of the Monodepth2 licence
-# which allows for non-commercial use only, the full terms of which are made
-# available in the LICENSE file.
-
 from __future__ import absolute_import, division, print_function
 
 # import copy
@@ -11,6 +5,8 @@ from __future__ import absolute_import, division, print_function
 import random
 
 import numpy as np
+
+# import pandas as pd
 import torch
 import torch.utils.data as data
 from PIL import Image  # using pillow-simd for increased speed
@@ -18,8 +14,6 @@ from torchvision import transforms
 
 
 def pil_loader(path):
-    # open path as file to avoid ResourceWarning
-    # (https://github.com/python-pillow/Pillow/issues/835)
     with open(path, 'rb') as f:
         with Image.open(f) as img:
             return img.convert('RGB')
@@ -41,6 +35,7 @@ class MonoDataset(data.Dataset):
 
     def __init__(
         self,
+        name,
         data_path,
         filenames,
         height,
@@ -52,6 +47,7 @@ class MonoDataset(data.Dataset):
     ):
         super(MonoDataset, self).__init__()
 
+        self.name = name
         self.data_path = data_path
         self.filenames = filenames
         self.height = height
@@ -148,26 +144,63 @@ class MonoDataset(data.Dataset):
         line = self.filenames[index].split()
         folder = line[0]
 
-        if len(line) == 3:
-            frame_index = int(line[1])
-        else:
-            frame_index = 0
+        # EvoCostyl
+        # frame_index = int(line[1])
 
-        if len(line) == 3:
-            side = line[2]
-        else:
+        if self.name == 'evo':
+
+            frame_index = int(line[1])
+
             side = None
 
-        for i in self.frame_idxs:
-            if i == "s":
-                other_side = {"r": "l", "l": "r"}[side]
+            # ind = int(line[2])
+
+            # print(line)
+
+            # files = pd.DataFrame.from_records(
+            #     [i.split() for i in self.filenames], columns=['folder', 'file', 'ind']
+            # )
+
+            # print(files)
+
+            # cur_file_folder = files[files['file'] == str(frame_index)]['folder'].iloc[0]
+            # print(cur_file_folder)
+
+            # an_file = lambda x: files[
+            # (files['folder'] == cur_file_folder) & (files['ind'] == str(ind + x))
+            # ]['file'].iloc[0]
+
+            for i in self.frame_idxs:
+                # print(i, an_file(i))
                 inputs[("color", i, -1)] = self.get_color(
-                    folder, frame_index, other_side, do_flip
+                    folder, frame_index, side, do_flip
                 )
+        else:
+            if len(line) == 3:
+                frame_index = int(line[1])
             else:
-                inputs[("color", i, -1)] = self.get_color(
-                    folder, frame_index + i, side, do_flip
-                )
+                frame_index = 0
+
+            if len(line) == 3:
+                side = line[2]
+            else:
+                side = None
+
+            if ((frame_index == 930) or (frame_index == 83)) and line[
+                0
+            ] == '2011_09_26_drive_0101_sync':
+                print('\n\n OH FUK!! \n\n')
+
+            for i in self.frame_idxs:
+                if i == "s":
+                    other_side = {"r": "l", "l": "r"}[side]
+                    inputs[("color", i, -1)] = self.get_color(
+                        folder, frame_index, other_side, do_flip
+                    )
+                else:
+                    inputs[("color", i, -1)] = self.get_color(
+                        folder, frame_index + i, side, do_flip
+                    )
 
         # adjusting intrinsics to match each scale in the pyramid
         for scale in range(self.num_scales):

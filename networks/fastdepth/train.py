@@ -1,8 +1,9 @@
+# import argparse
 import csv
 import os
 import time
 
-import configuration_file
+import config
 import models
 import numpy as np
 import torch
@@ -11,7 +12,6 @@ import torch.nn.parallel
 import torch.optim
 import utils
 from dataloaders.kitti import KITTIDataset
-from dataloaders.nyu import NYUDataset
 from loss_function import MaskedL1Loss, MaskedMSELoss
 from metrics import AverageMeter, Result
 
@@ -20,7 +20,7 @@ cudnn.benchmark = True
 
 args = utils.parse_command()
 print(args)
-if configuration_file.GPU is True:
+if config.GPU is True:
     os.environ["CUDA_VISIBLE_DEVICES"] = '0'  # Set the GPU.
 else:
     os.environ["CUDA_VISIBLE_DEVICES"] = ""  # Set the CPU
@@ -45,19 +45,12 @@ best_result.set_to_worst()
 def create_data_loaders(args):
     # Data loading code
     print("=> creating data loaders ...")
-    datasets = configuration_file.datasets_path  # location of the dataset
+    datasets = config.datasets_path  # location of the dataset
     traindir = os.path.join(datasets, args.data, 'train')
     valdir = os.path.join(datasets, args.data, 'val')
     train_loader = None
     val_loader = None
-    # load nyudepthv2 dataset
-    if args.data == 'nyudepthv2':
-        if not args.evaluate:  # load training data
-            train_dataset = NYUDataset(traindir, split='train', modality=args.modality)
-        # load validation data
-        val_dataset = NYUDataset(valdir, split='val', modality=args.modality)
-    # load kitti datasets
-    elif args.data == 'kitti':
+    if args.data == 'kitti':
         if not args.evaluate:  # load training data
             train_dataset = KITTIDataset(traindir, type='train', modality=args.modality)
         # load validation data
@@ -102,7 +95,7 @@ def main():
 
     # evaluation mode
     if args.evaluate:
-        datasets = configuration_file.datasets_path
+        datasets = config.datasets_path
         valdir = os.path.join(datasets, args.data, 'val')
         print("Validation directory ", valdir)
         if args.data == 'nyudepthv2':
@@ -182,8 +175,8 @@ def main():
             weight_decay=args.weight_decay,
         )  # configure optimizer
 
-        if configuration_file.GPU is True:
-            if configuration_file.MULTI_GPU is True:  # training on multiple GPU
+        if config.GPU is True:
+            if config.MULTI_GPU is True:  # training on multiple GPU
                 model = torch.nn.DataParallel(model).cuda()
             else:  # training on single GPU
                 model = model.cuda()
@@ -192,12 +185,12 @@ def main():
 
     # define loss function  and optimizer
     if args.criterion == 'l2':
-        if configuration_file.GPU is True:
+        if config.GPU is True:
             criterion = MaskedMSELoss().cuda()
         else:
             criterion = MaskedMSELoss()
     elif args.criterion == 'l1':
-        if configuration_file.GPU is True:
+        if config.GPU is True:
             criterion = MaskedL1Loss().cuda()
         else:
             criterion = MaskedL1Loss()
@@ -273,7 +266,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
     end = time.time()
     for i, (input, target) in enumerate(train_loader):
 
-        if configuration_file.GPU is True:
+        if config.GPU is True:
             input, target = input.cuda(), target.cuda()
             torch.cuda.synchronize()
         else:
@@ -287,7 +280,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
         optimizer.zero_grad()
         loss.backward()  # compute gradient and do SGD step
         optimizer.step()
-        if configuration_file.GPU is True:
+        if config.GPU is True:
             torch.cuda.synchronize()
         gpu_time = time.time() - end
 
@@ -343,7 +336,7 @@ def validate(val_loader, model, epoch, write_to_file=True):
     model.eval()  # switch to evaluate mode
     end = time.time()
     for i, (input, target) in enumerate(val_loader):
-        if configuration_file.GPU is True:
+        if config.GPU is True:
             input, target = input.cuda(), target.cuda()
         # torch.cuda.synchronize()
         data_time = time.time() - end

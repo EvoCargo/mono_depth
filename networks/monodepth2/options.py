@@ -1,9 +1,3 @@
-# Copyright Niantic 2019. Patent Pending. All rights reserved.
-#
-# This software is licensed under the terms of the Monodepth2 licence
-# which allows for non-commercial use only, the full terms of which are made
-# available in the LICENSE file.
-
 from __future__ import absolute_import, division, print_function
 
 import argparse
@@ -42,7 +36,7 @@ class MonodepthOptions:
             "--split",
             type=str,
             help="which training split to use",
-            choices=["eigen_zhou", "eigen_full", "odom", "benchmark"],
+            choices=["eigen_zhou", "eigen_full", "odom", "benchmark", 'evo'],
             default="eigen_zhou",
         )
         self.parser.add_argument(
@@ -57,7 +51,7 @@ class MonodepthOptions:
             type=str,
             help="dataset to train on",
             default="kitti",
-            choices=["kitti", "kitti_odom", "kitti_depth", "kitti_test"],
+            choices=["kitti", "kitti_odom", "kitti_depth", "kitti_test", 'evo'],
         )
         self.parser.add_argument(
             "--png",
@@ -164,7 +158,7 @@ class MonodepthOptions:
             "--no_cuda", help="if set disables CUDA", action="store_true"
         )
         self.parser.add_argument(
-            "--num_workers", type=int, help="number of dataloader workers", default=12
+            "--num_workers", type=int, help="number of dataloader workers", default=8
         )
 
         # LOADING options

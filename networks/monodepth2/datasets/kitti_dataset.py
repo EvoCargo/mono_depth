@@ -1,9 +1,3 @@
-# Copyright Niantic 2019. Patent Pending. All rights reserved.
-#
-# This software is licensed under the terms of the Monodepth2 licence
-# which allows for non-commercial use only, the full terms of which are made
-# available in the LICENSE file.
-
 from __future__ import absolute_import, division, print_function
 
 import os
@@ -122,10 +116,48 @@ class KITTIDepthDataset(KITTIDataset):
 
     def get_depth(self, folder, frame_index, side, do_flip):
         f_str = "{:010d}.png".format(frame_index)
+
         depth_path = os.path.join(
             self.data_path,
             folder,
             "proj_depth/groundtruth/image_0{}".format(self.side_map[side]),
+            f_str,
+        )
+
+        depth_gt = pil.open(depth_path)
+        depth_gt = depth_gt.resize(self.full_res_shape, pil.NEAREST)
+        depth_gt = np.array(depth_gt).astype(np.float32) / 256
+
+        if do_flip:
+            depth_gt = np.fliplr(depth_gt)
+
+        return depth_gt
+
+
+class EvoDataset(KITTIDataset):
+    """Evo dataset which uses the updated ground truth depth maps"""
+
+    def __init__(self, *args, **kwargs):
+        super(EvoDataset, self).__init__(*args, **kwargs)
+
+    def get_image_path(self, folder, frame_index, side):
+        f_str = "{}_{:19d}.jpg".format(folder, frame_index)
+
+        # print(folder, frame_index)
+        # print('image: ', f_str)
+
+        image_path = os.path.join(self.data_path, folder, "front_rgb_left", f_str)
+        return image_path
+
+    def get_depth(self, folder, frame_index, side, do_flip):
+        f_str = "{}_{:19d}.png".format(folder, frame_index)
+
+        print('depth: ', f_str)
+
+        depth_path = os.path.join(
+            self.data_path,
+            folder,
+            'front_depth_left',
             f_str,
         )
 

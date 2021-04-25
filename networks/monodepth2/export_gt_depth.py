@@ -1,9 +1,3 @@
-# Copyright Niantic 2019. Patent Pending. All rights reserved.
-#
-# This software is licensed under the terms of the Monodepth2 licence
-# which allows for non-commercial use only, the full terms of which are made
-# available in the LICENSE file.
-
 from __future__ import absolute_import, division, print_function
 
 import argparse
@@ -68,7 +62,7 @@ def export_gt_depths_kitti():
 
     print("Saving to {}".format(opt.split))
 
-    np.savez_compressed(output_path, data=np.array(gt_depths))
+    np.savez_compressed(output_path, data=np.array(gt_depths), dtype=object)
 
 
 if __name__ == "__main__":

@@ -1,20 +1,26 @@
 # Monodepth2
 
-## ⚙️ Setup
+## Training
 
-Assuming a fresh [Anaconda](https://www.anaconda.com/download/) distribution, you can install the dependencies with:
-```shell
-conda install pytorch=0.4.1 torchvision=0.2.1 -c pytorch
-pip install tensorboardX==1.4
-conda install opencv=3.3.1   # just needed for evaluation
+To train network from scratch on KITTI use:
+
+```bash
+python train.py --model_name mono_model --data_path /media/data/datasets/penitto/kitti --png \
+--split benchmark --batch_size 8 --height 128 --width 416 --dataset kitti_depth
 ```
-We ran our experiments with PyTorch 0.4.1, CUDA 9.1, Python 3.6.6 and Ubuntu 18.04.
-We have also successfully trained models with PyTorch 1.0, and our code is compatible with Python 2.7. You may have issues installing OpenCV version 3.3.1 if you use Python 3.7, we recommend to create a virtual environment with Python 3.6.6 `conda create -n monodepth2 python=3.6.6 anaconda `.
 
-<!-- We recommend using a [conda environment](https://conda.io/docs/user-guide/tasks/manage-environments.html) to avoid dependency conflicts.
+To train network from scratch on Evo use:
 
-We also recommend using `pillow-simd` instead of `pillow` for faster image preprocessing in the dataloaders. -->
+```bash
+python train.py --model_name mono_model --data_path /media/data/datasets/bag_depth \
+--split evo --batch_size ? --height ? --width ? --dataset evo
+```
 
+TO DO resume studying in name:
+
+```bash
+python train.py --model_name mono_model --data_path /media/data/datasets/bag_depth
+```
 
 ## Inference
 
@@ -128,12 +134,6 @@ Add the following to the training command to load an existing model for finetuni
 python train.py --model_name finetuned_mono --load_weights_folder ~/tmp/mono_model/models/weights_19
 ```
 
-
-### 🔧 Other training options
-
-Run `python train.py -h` (or look at `options.py`) to see the range of other training options, such as learning rates and ablation settings.
-
-
 ## 📊 KITTI evaluation
 
 To prepare the ground truth depth maps run:
@@ -173,39 +173,3 @@ Finally you can also use `evaluate_depth.py` to evaluate raw disparities (or inv
 ```shell
 python evaluate_depth.py --ext_disp_to_eval ~/other_method_disp.npy
 ```
-
-
-**📷📷 Note on stereo evaluation**
-
-Our stereo models are trained with an effective baseline of `0.1` units, while the actual KITTI stereo rig has a baseline of `0.54m`. This means a scaling of `5.4` must be applied for evaluation.
-In addition, for models trained with stereo supervision we disable median scaling.
-Setting the `--eval_stereo` flag when evaluating will automatically disable median scaling and scale predicted depths by `5.4`.
-
-
-**⤴️⤵️ Odometry evaluation**
-
-We include code for evaluating poses predicted by models trained with `--split odom --dataset kitti_odom --data_path /path/to/kitti/odometry/dataset`.
-
-For this evaluation, the [KITTI odometry dataset](http://www.cvlibs.net/datasets/kitti/eval_odometry.php) **(color, 65GB)** and **ground truth poses** zip files must be downloaded.
-As above, we assume that the pngs have been converted to jpgs.
-
-If this data has been unzipped to folder `kitti_odom`, a model can be evaluated with:
-```shell
-python evaluate_pose.py --eval_split odom_9 --load_weights_folder ./odom_split.M/models/weights_29 --data_path kitti_odom/
-python evaluate_pose.py --eval_split odom_10 --load_weights_folder ./odom_split.M/models/weights_29 --data_path kitti_odom/
-```
-
-
-## 📦 Precomputed results
-
-You can download our precomputed disparity predictions from the following links:
-
-
-| Training modality | Input size  | `.npy` filesize | Eigen disparities                                                                             |
-|-------------------|-------------|-----------------|-----------------------------------------------------------------------------------------------|
-| Mono              | 640 x 192   | 343 MB          | [Download 🔗](https://storage.googleapis.com/niantic-lon-static/research/monodepth2/mono_640x192_eigen.npy)           |
-| Stereo            | 640 x 192   | 343 MB          | [Download 🔗](https://storage.googleapis.com/niantic-lon-static/research/monodepth2/stereo_640x192_eigen.npy)         |
-| Mono + Stereo     | 640 x 192   | 343 MB          | [Download 🔗](https://storage.googleapis.com/niantic-lon-static/research/monodepth2/mono%2Bstereo_640x192_eigen.npy)  |
-| Mono              | 1024 x 320  | 914 MB          | [Download 🔗](https://storage.googleapis.com/niantic-lon-static/research/monodepth2/mono_1024x320_eigen.npy)          |
-| Stereo            | 1024 x 320  | 914 MB          | [Download 🔗](https://storage.googleapis.com/niantic-lon-static/research/monodepth2/stereo_1024x320_eigen.npy)        |
-| Mono + Stereo     | 1024 x 320  | 914 MB          | [Download 🔗](https://storage.googleapis.com/niantic-lon-static/research/monodepth2/mono%2Bstereo_1024x320_eigen.npy) |
