@@ -147,3 +147,7 @@ dmypy.json
 
 # Pretrained models
 pretrained/
+
+# Output
+*.tiberius
+log/

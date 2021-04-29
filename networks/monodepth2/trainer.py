@@ -147,7 +147,12 @@ class Trainer:
         val_filenames = readlines(fpath.format("val"))
         img_ext = '.png' if self.opt.png else '.jpg'
 
-        num_train_samples = len(train_filenames)
+        # Evo костыль
+        if self.opt.dataset == 'evo':
+            num_train_samples = len(train_filenames) - 40
+        else:
+            num_train_samples = len(train_filenames)
+
         self.num_total_steps = (
             num_train_samples // self.opt.batch_size * self.opt.num_epochs
         )

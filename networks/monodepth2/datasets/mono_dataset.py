@@ -144,63 +144,26 @@ class MonoDataset(data.Dataset):
         line = self.filenames[index].split()
         folder = line[0]
 
-        # EvoCostyl
-        # frame_index = int(line[1])
-
-        if self.name == 'evo':
-
+        if len(line) == 3:
             frame_index = int(line[1])
+        else:
+            frame_index = 0
 
+        if len(line) == 3:
+            side = line[2]
+        else:
             side = None
 
-            # ind = int(line[2])
-
-            # print(line)
-
-            # files = pd.DataFrame.from_records(
-            #     [i.split() for i in self.filenames], columns=['folder', 'file', 'ind']
-            # )
-
-            # print(files)
-
-            # cur_file_folder = files[files['file'] == str(frame_index)]['folder'].iloc[0]
-            # print(cur_file_folder)
-
-            # an_file = lambda x: files[
-            # (files['folder'] == cur_file_folder) & (files['ind'] == str(ind + x))
-            # ]['file'].iloc[0]
-
-            for i in self.frame_idxs:
-                # print(i, an_file(i))
+        for i in self.frame_idxs:
+            if i == "s":
+                other_side = {"r": "l", "l": "r"}[side]
                 inputs[("color", i, -1)] = self.get_color(
-                    folder, frame_index, side, do_flip
+                    folder, frame_index, other_side, do_flip
                 )
-        else:
-            if len(line) == 3:
-                frame_index = int(line[1])
             else:
-                frame_index = 0
-
-            if len(line) == 3:
-                side = line[2]
-            else:
-                side = None
-
-            if ((frame_index == 930) or (frame_index == 83)) and line[
-                0
-            ] == '2011_09_26_drive_0101_sync':
-                print('\n\n OH FUK!! \n\n')
-
-            for i in self.frame_idxs:
-                if i == "s":
-                    other_side = {"r": "l", "l": "r"}[side]
-                    inputs[("color", i, -1)] = self.get_color(
-                        folder, frame_index, other_side, do_flip
-                    )
-                else:
-                    inputs[("color", i, -1)] = self.get_color(
-                        folder, frame_index + i, side, do_flip
-                    )
+                inputs[("color", i, -1)] = self.get_color(
+                    folder, frame_index + i, side, do_flip
+                )
 
         # adjusting intrinsics to match each scale in the pyramid
         for scale in range(self.num_scales):

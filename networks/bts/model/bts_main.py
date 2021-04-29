@@ -47,7 +47,7 @@ parser.add_argument(
 )
 # Dataset
 parser.add_argument(
-    '--dataset', type=str, help='dataset to train on, kitti or nyu', default='nyu'
+    '--dataset', type=str, help='dataset to train on, kitti or nyu', default='kitti'
 )
 parser.add_argument('--data_path', type=str, help='path to the data', required=True)
 parser.add_argument(

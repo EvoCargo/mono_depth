@@ -146,5 +146,3 @@ Monodepth2 | NaN | NaN | NaN
 * Requirements for each network
 
 * .txt files download script (if needed)
-
-* Make inference for networks

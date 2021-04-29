@@ -112,7 +112,9 @@ class DataLoadPreprocess(Dataset):
                     self.args.data_path, "./" + sample_path.split()[0]
                 )
                 depth_path = os.path.join(
-                    self.args.gt_path, "./" + sample_path.split()[1]
+                    self.args.gt_path,
+                    "./" + sample_path.split()[0].split('/')[0],
+                    sample_path.split()[1],
                 )
 
             image = Image.open(image_path)

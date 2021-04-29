@@ -1,11 +1,15 @@
 from __future__ import absolute_import, division, print_function
 
 import os
+import random
 
 import numpy as np
+import pandas as pd
 import PIL.Image as pil
 import skimage.transform
+import torch
 from kitti_utils import generate_depth_map
+from torchvision import transforms
 
 from .mono_dataset import MonoDataset
 
@@ -140,19 +144,107 @@ class EvoDataset(KITTIDataset):
     def __init__(self, *args, **kwargs):
         super(EvoDataset, self).__init__(*args, **kwargs)
 
+        def mask_first_last(x):
+            result = np.ones_like(x)
+            result[0] = 0
+            result[-1] = 0
+            return result
+
+        self.filenames = pd.DataFrame.from_records(
+            [i.split() for i in self.filenames], columns=['folder', 'file', 'ind']
+        )
+
+        self.filenames.to_csv('filenames.csv', index=False)
+
+        mask = (
+            self.filenames.groupby('folder')['folder']
+            .transform(mask_first_last)
+            .astype(bool)
+        )
+        self.mod_filenames = self.filenames.loc[mask]
+        self.mod_filenames.reset_index(drop=True, inplace=True)
+
     def get_image_path(self, folder, frame_index, side):
         f_str = "{}_{:19d}.jpg".format(folder, frame_index)
-
-        # print(folder, frame_index)
-        # print('image: ', f_str)
-
         image_path = os.path.join(self.data_path, folder, "front_rgb_left", f_str)
+
         return image_path
+
+    def __getitem__(self, index):
+        # print(index)
+        inputs = {}
+
+        do_color_aug = self.is_train and random.random() > 0.5
+        do_flip = self.is_train and random.random() > 0.5
+
+        folder = self.mod_filenames.iloc[index]['folder']
+        frame_index = self.mod_filenames.iloc[index]['file']
+        ind = int(self.mod_filenames.iloc[index]['ind'])
+        side = None
+
+        for i in self.frame_idxs:
+            if (
+                len(
+                    self.filenames[
+                        (self.filenames['folder'] == folder)
+                        & (self.filenames['ind'] == str(ind + i))
+                    ]
+                )
+                == 0
+            ):
+                print(folder, ind, i, frame_index)
+
+            an_file = self.filenames[
+                (self.filenames['folder'] == folder)
+                & (self.filenames['ind'] == str(ind + i))
+            ]['file'].iloc[0]
+            inputs[("color", i, -1)] = self.get_color(folder, int(an_file), side, do_flip)
+
+        # adjusting intrinsics to match each scale in the pyramid
+        for scale in range(self.num_scales):
+            K = self.K.copy()
+
+            K[0, :] *= self.width // (2 ** scale)
+            K[1, :] *= self.height // (2 ** scale)
+
+            inv_K = np.linalg.pinv(K)
+
+            inputs[("K", scale)] = torch.from_numpy(K)
+            inputs[("inv_K", scale)] = torch.from_numpy(inv_K)
+
+        if do_color_aug:
+            color_aug = transforms.ColorJitter.get_params(
+                self.brightness, self.contrast, self.saturation, self.hue
+            )
+        else:
+            color_aug = lambda x: x  # noqa
+
+        self.preprocess(inputs, color_aug)
+
+        for i in self.frame_idxs:
+            del inputs[("color", i, -1)]
+            del inputs[("color_aug", i, -1)]
+
+        if self.load_depth:
+            depth_gt = self.get_depth(folder, frame_index, side, do_flip)
+            inputs["depth_gt"] = np.expand_dims(depth_gt, 0)
+            inputs["depth_gt"] = torch.from_numpy(inputs["depth_gt"].astype(np.float32))
+
+        if "s" in self.frame_idxs:
+            stereo_T = np.eye(4, dtype=np.float32)
+            baseline_sign = -1 if do_flip else 1
+            side_sign = -1 if side == "l" else 1
+            stereo_T[0, 3] = side_sign * baseline_sign * 0.1
+
+            inputs["stereo_T"] = torch.from_numpy(stereo_T)
+
+        return inputs
+
+    def __len__(self):
+        return len(self.mod_filenames)
 
     def get_depth(self, folder, frame_index, side, do_flip):
         f_str = "{}_{:19d}.png".format(folder, frame_index)
-
-        print('depth: ', f_str)
 
         depth_path = os.path.join(
             self.data_path,

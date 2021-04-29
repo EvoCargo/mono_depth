@@ -24,6 +24,7 @@ xlrd = "^2.0.1"
 openpyxl = "^3.0.7"
 tensorboardX = "^2.2"
 h5py = "^3.2.1"
+wandb = "^0.10.27"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
