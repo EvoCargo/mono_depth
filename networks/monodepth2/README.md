@@ -19,8 +19,10 @@ python train.py --model_name mono_model --data_path /media/data/datasets/bag_dep
 TO DO resume studying in name:
 
 ```bash
-python train.py --model_name mono_model --data_path /media/data/datasets/bag_depth
+python train.py --model_name mono_model --data_path /media/data/datasets/bag_depth --load_weights_folder ./pretrained/mono_640x192
 ```
+
+
 
 ## Inference
 
@@ -75,20 +77,6 @@ This can be changed with the `--log_dir` flag.
 **Monocular training:**
 ```shell
 python train.py --model_name mono_model
-```
-
-**Stereo training:**
-
-Our code defaults to using Zhou's subsampled Eigen training data. For stereo-only training we have to specify that we want to use the full Eigen training set – see paper for details.
-```shell
-python train.py --model_name stereo_model \
-  --frame_ids 0 --use_stereo --split eigen_full
-```
-
-**Monocular + stereo training:**
-```shell
-python train.py --model_name mono+stereo_model \
-  --frame_ids 0 -1 1 --use_stereo
 ```
 
 

@@ -151,3 +151,7 @@ pretrained/
 # Output
 *.tiberius
 log/
+
+# Model weights
+*.pt
+*.pth

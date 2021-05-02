@@ -26,6 +26,8 @@ In this repo we try to implement next networks for our task:
 
     * AdaBins [[paper](https://arxiv.org/pdf/2011.14141v1.pdf)] [[code](https://github.com/shariqfarooq123/AdaBins)]
 
+    * DPT [[paper](https://arxiv.org/pdf/2103.13413.pdf)] [[code](https://github.com/intel-isl/DPT)]
+
 # Datasets
 
 There are 3 datasets available for our task:
@@ -143,6 +145,10 @@ Monodepth2 | NaN | NaN | NaN
 
 # TODO ❗❗❗
 
-* Requirements for each network
+* Eval for monodepth2
 
-* .txt files download script (if needed)
+* Evo dataset for bts
+
+* Finetune for bts
+
+* Other networks

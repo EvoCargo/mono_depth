@@ -55,6 +55,7 @@ class BtsDataLoader(object):
                 )
             else:
                 self.eval_sampler = None
+
             self.data = DataLoader(
                 self.testing_samples,
                 1,
@@ -63,7 +64,6 @@ class BtsDataLoader(object):
                 pin_memory=True,
                 sampler=self.eval_sampler,
             )
-
         elif mode == 'test':
             self.testing_samples = DataLoadPreprocess(
                 args, mode, transform=preprocessing_transforms(mode)
@@ -96,26 +96,12 @@ class DataLoadPreprocess(Dataset):
         focal = float(sample_path.split()[2])
 
         if self.mode == 'train':
-            if (
-                self.args.dataset == 'kitti'
-                and self.args.use_right is True
-                and random.random() > 0.5
-            ):
-                image_path = os.path.join(
-                    self.args.data_path, "./" + sample_path.split()[3]
-                )
-                depth_path = os.path.join(
-                    self.args.gt_path, "./" + sample_path.split()[4]
-                )
-            else:
-                image_path = os.path.join(
-                    self.args.data_path, "./" + sample_path.split()[0]
-                )
-                depth_path = os.path.join(
-                    self.args.gt_path,
-                    "./" + sample_path.split()[0].split('/')[0],
-                    sample_path.split()[1],
-                )
+            image_path = os.path.join(self.args.data_path, sample_path.split()[0])
+            depth_path = os.path.join(
+                self.args.gt_path,
+                sample_path.split()[0].split('/')[0],
+                sample_path.split()[1],
+            )
 
             image = Image.open(image_path)
             depth_gt = Image.open(depth_path)
@@ -132,11 +118,6 @@ class DataLoadPreprocess(Dataset):
                     (left_margin, top_margin, left_margin + 1216, top_margin + 352)
                 )
 
-            # To avoid blank boundaries due to pixel registration
-            if self.args.dataset == 'nyu':
-                depth_gt = depth_gt.crop((43, 45, 608, 472))
-                image = image.crop((43, 45, 608, 472))
-
             if self.args.do_random_rotate is True:
                 random_angle = (random.random() - 0.5) * 2 * self.args.degree
                 image = self.rotate_image(image, random_angle)
@@ -146,10 +127,7 @@ class DataLoadPreprocess(Dataset):
             depth_gt = np.asarray(depth_gt, dtype=np.float32)
             depth_gt = np.expand_dims(depth_gt, axis=2)
 
-            if self.args.dataset == 'nyu':
-                depth_gt = depth_gt / 1000.0
-            else:
-                depth_gt = depth_gt / 256.0
+            depth_gt = depth_gt / 256.0
 
             image, depth_gt = self.random_crop(
                 image, depth_gt, self.args.input_height, self.args.input_width
@@ -163,12 +141,14 @@ class DataLoadPreprocess(Dataset):
             else:
                 data_path = self.args.data_path
 
-            image_path = os.path.join(data_path, "./" + sample_path.split()[0])
+            image_path = os.path.join(data_path, sample_path.split()[0])
             image = np.asarray(Image.open(image_path), dtype=np.float32) / 255.0
 
             if self.mode == 'online_eval':
                 gt_path = self.args.gt_path_eval
-                depth_path = os.path.join(gt_path, "./" + sample_path.split()[1])
+                depth_path = os.path.join(
+                    gt_path, sample_path.split()[0].split('/')[0], sample_path.split()[1]
+                )
                 has_valid_depth = False
                 try:
                     depth_gt = Image.open(depth_path)

@@ -118,7 +118,7 @@ def main(**args):
         download_file_from_google_drive(file_id, destination)
         with zipfile.ZipFile(destination, 'r') as zip_ref:
             zip_ref.extractall(
-                '/networks/{}/pretrained/{}/.'.format(args['network'], args['model'])
+                './networks/{}/pretrained/{}/.'.format(args['network'], args['model'])
             )
         os.remove(destination)
 

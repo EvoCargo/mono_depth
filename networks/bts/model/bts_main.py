@@ -250,8 +250,8 @@ if (args.mode == 'train') and (args.checkpoint_path):
 
 
 inv_normalize = transforms.Normalize(
-    mean=[-0.485 / 0.229, -0.456 / 0.224, -0.406 / 0.225],
-    std=[1 / 0.229, 1 / 0.224, 1 / 0.225],
+    mean=torch.tensor([-0.485 / 0.229, -0.456 / 0.224, -0.406 / 0.225], device='cuda:0'),
+    std=torch.tensor([1 / 0.229, 1 / 0.224, 1 / 0.225], device='cuda:0'),
 )
 
 eval_metrics = ['silog', 'abs_rel', 'log10', 'rms', 'sq_rel', 'log_rms', 'd1', 'd2', 'd3']
@@ -436,8 +436,15 @@ def online_eval(model, dataloader_eval, gpu, ngpus):
 
         measures = compute_errors(gt_depth[valid_mask], pred_depth[valid_mask])
 
+        # print('Measures', measures, '\n')
+
         eval_measures[:9] += torch.tensor(measures).cuda(device=gpu)
         eval_measures[9] += 1
+
+    # print('Eval_measures\n')
+    # print(type(eval_measures))
+    # print(eval_measures)
+    # print(eval_measures.device, '\n')
 
     if args.multiprocessing_distributed:
         group = dist.new_group([i for i in range(ngpus)])
