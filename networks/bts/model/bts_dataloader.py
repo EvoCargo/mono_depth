@@ -106,9 +106,10 @@ class DataLoadPreprocess(Dataset):
             image = Image.open(image_path)
             depth_gt = Image.open(depth_path)
 
-            if self.args.do_kb_crop is True:
+            if self.args.do_kb_crop:
                 height = image.height
                 width = image.width
+
                 top_margin = int(height - 352)
                 left_margin = int((width - 1216) / 2)
                 depth_gt = depth_gt.crop(

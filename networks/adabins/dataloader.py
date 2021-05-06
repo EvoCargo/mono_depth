@@ -103,29 +103,19 @@ class DataLoadPreprocess(Dataset):
         focal = float(sample_path.split()[2])
 
         if self.mode == 'train':
-            if (
-                self.args.dataset == 'kitti'
-                and self.args.use_right is True
-                and random.random() > 0.5
-            ):
-                image_path = os.path.join(
-                    self.args.data_path, remove_leading_slash(sample_path.split()[3])
-                )
-                depth_path = os.path.join(
-                    self.args.gt_path, remove_leading_slash(sample_path.split()[4])
-                )
-            else:
-                image_path = os.path.join(
-                    self.args.data_path, remove_leading_slash(sample_path.split()[0])
-                )
-                depth_path = os.path.join(
-                    self.args.gt_path, remove_leading_slash(sample_path.split()[1])
-                )
 
+            image_path = os.path.join(
+                self.args.data_path, remove_leading_slash(sample_path.split()[0])
+            )
+            depth_path = os.path.join(
+                self.args.gt_path,
+                sample_path.split()[0].split('/')[0],
+                sample_path.split()[1],
+            )
             image = Image.open(image_path)
             depth_gt = Image.open(depth_path)
 
-            if self.args.do_kb_crop is True:
+            if self.args.do_kb_crop:
                 height = image.height
                 width = image.width
                 top_margin = int(height - 352)
@@ -136,13 +126,9 @@ class DataLoadPreprocess(Dataset):
                 image = image.crop(
                     (left_margin, top_margin, left_margin + 1216, top_margin + 352)
                 )
+                # print(image.size)
 
-            # To avoid blank boundaries due to pixel registration
-            if self.args.dataset == 'nyu':
-                depth_gt = depth_gt.crop((43, 45, 608, 472))
-                image = image.crop((43, 45, 608, 472))
-
-            if self.args.do_random_rotate is True:
+            if self.args.do_random_rotate:
                 random_angle = (random.random() - 0.5) * 2 * self.args.degree
                 image = self.rotate_image(image, random_angle)
                 depth_gt = self.rotate_image(depth_gt, random_angle, flag=Image.NEAREST)
@@ -151,10 +137,7 @@ class DataLoadPreprocess(Dataset):
             depth_gt = np.asarray(depth_gt, dtype=np.float32)
             depth_gt = np.expand_dims(depth_gt, axis=2)
 
-            if self.args.dataset == 'nyu':
-                depth_gt = depth_gt / 1000.0
-            else:
-                depth_gt = depth_gt / 256.0
+            depth_gt = depth_gt / 256.0
 
             image, depth_gt = self.random_crop(
                 image, depth_gt, self.args.input_height, self.args.input_width
@@ -189,12 +172,10 @@ class DataLoadPreprocess(Dataset):
                 if has_valid_depth:
                     depth_gt = np.asarray(depth_gt, dtype=np.float32)
                     depth_gt = np.expand_dims(depth_gt, axis=2)
-                    if self.args.dataset == 'nyu':
-                        depth_gt = depth_gt / 1000.0
-                    else:
-                        depth_gt = depth_gt / 256.0
 
-            if self.args.do_kb_crop is True:
+                    depth_gt = depth_gt / 256.0
+
+            if self.args.do_kb_crop:
                 height = image.shape[0]
                 width = image.shape[1]
                 top_margin = int(height - 352)
@@ -259,10 +240,7 @@ class DataLoadPreprocess(Dataset):
         image_aug = image ** gamma
 
         # brightness augmentation
-        if self.args.dataset == 'nyu':
-            brightness = random.uniform(0.75, 1.25)
-        else:
-            brightness = random.uniform(0.9, 1.1)
+        brightness = random.uniform(0.9, 1.1)
         image_aug = image_aug * brightness
 
         # color augmentation

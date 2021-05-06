@@ -20,6 +20,8 @@ class BaseDataset(data.Dataset):
         else:
             self.preprocess = self._te_preprocess
 
+        # print(type(self.depth_loader), self.depth_loader)
+
     def __len__(self):
         return len(self.filenames)
 
@@ -49,6 +51,9 @@ class BaseDataset(data.Dataset):
         depth = None
         if depth_path is not None:
             depth = self.depth_loader(depth_path)
+
+        # print('Train:', image.size, depth.shape)
+
         return image, depth
 
     def _parse_path(self, index):

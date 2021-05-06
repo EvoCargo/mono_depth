@@ -26,11 +26,11 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
-try:
-    from apex import amp
-    from apex.parallel import DistributedDataParallel, convert_syncbn_model
-except ImportError:
-    raise ImportError("Please install apex from https://www.github.com/nvidia/apex .")
+# try:
+#     from apex import amp
+#     from apex.parallel import DistributedDataParallel, convert_syncbn_model
+# except ImportError:
+#     raise ImportError("Please install apex from https://www.github.com/nvidia/apex .")
 
 
 class Solver(object):
@@ -74,10 +74,10 @@ class Solver(object):
         else:
             cudnn.benchmark = True
 
-        if self.config['apex']:
-            assert (
-                torch.backends.cudnn.enabled
-            ), "Amp requires cudnn backend to be enabled."
+        # if self.config['apex']:
+        #     assert (
+        #         torch.backends.cudnn.enabled
+        #     ), "Amp requires cudnn backend to be enabled."
 
         # set random seed
         torch.manual_seed(self.config['environ']['seed'])
@@ -130,28 +130,28 @@ class Solver(object):
 
         self.model.cuda(self.local_rank)
 
-        if self.distributed:
-            self.model = convert_syncbn_model(self.model)
+        # if self.distributed:
+        #     self.model = convert_syncbn_model(self.model)
 
-        if self.config['apex']['amp_used']:
-            # Initialize Amp.  Amp accepts either values or strings for the optional override arguments,
-            # for convenient interoperation with argparse.
-            logging.info(
-                "Initialize Amp. opt level={}, keep batchnorm fp32={}, loss_scale={}.".format(
-                    self.config['apex']['opt_level'],
-                    self.config['apex']['keep_batchnorm_fp32'],
-                    self.config['apex']['loss_scale'],
-                )
-            )
-            self.model, self.optimizer = amp.initialize(
-                self.model,
-                self.optimizer,
-                opt_level=self.config['apex']['opt_level'],
-                keep_batchnorm_fp32=self.config['apex']["keep_batchnorm_fp32"],
-                loss_scale=self.config['apex']["loss_scale"],
-            )
-        if self.distributed:
-            self.model = DistributedDataParallel(self.model)
+        # if self.config['apex']['amp_used']:
+        #     # Initialize Amp.  Amp accepts either values or strings for the optional override arguments,
+        #     # for convenient interoperation with argparse.
+        #     logging.info(
+        #         "Initialize Amp. opt level={}, keep batchnorm fp32={}, loss_scale={}.".format(
+        #             self.config['apex']['opt_level'],
+        #             self.config['apex']['keep_batchnorm_fp32'],
+        #             self.config['apex']['loss_scale'],
+        #         )
+        #     )
+        #     self.model, self.optimizer = amp.initialize(
+        #         self.model,
+        #         self.optimizer,
+        #         opt_level=self.config['apex']['opt_level'],
+        #         keep_batchnorm_fp32=self.config['apex']["keep_batchnorm_fp32"],
+        #         loss_scale=self.config['apex']["loss_scale"],
+        #     )
+        # if self.distributed:
+        #     self.model = DistributedDataParallel(self.model)
 
         t_end = time.time()
         logging.info(
@@ -184,30 +184,30 @@ class Solver(object):
         load_model(self.model, continue_state_object['model'], distributed=False)
         self.model.cuda(self.local_rank)
 
-        if self.distributed:
-            self.model = convert_syncbn_model(self.model)
+        # if self.distributed:
+        #     self.model = convert_syncbn_model(self.model)
 
-        if self.config['apex']['amp_used']:
-            # Initialize Amp.  Amp accepts either values or strings for the optional override arguments,
-            # for convenient interoperation with argparse.
-            logging.info(
-                "Initialize Amp. opt level={}, keep batchnorm fp32={}, loss_scale={}.".format(
-                    self.config['apex']['opt_level'],
-                    self.config['apex']['keep_batchnorm_fp32'],
-                    self.config['apex']['loss_scale'],
-                )
-            )
-            self.model, self.optimizer = amp.initialize(
-                self.model,
-                self.optimizer,
-                opt_level=self.config['apex']['opt_level'],
-                keep_batchnorm_fp32=self.config['apex']["keep_batchnorm_fp32"],
-                loss_scale=self.config['apex']["loss_scale"],
-            )
-            amp.load_state_dict(continue_state_object['amp'])
+        # if self.config['apex']['amp_used']:
+        #     # Initialize Amp.  Amp accepts either values or strings for the optional override arguments,
+        #     # for convenient interoperation with argparse.
+        #     logging.info(
+        #         "Initialize Amp. opt level={}, keep batchnorm fp32={}, loss_scale={}.".format(
+        #             self.config['apex']['opt_level'],
+        #             self.config['apex']['keep_batchnorm_fp32'],
+        #             self.config['apex']['loss_scale'],
+        #         )
+        #     )
+        #     self.model, self.optimizer = amp.initialize(
+        #         self.model,
+        #         self.optimizer,
+        #         opt_level=self.config['apex']['opt_level'],
+        #         keep_batchnorm_fp32=self.config['apex']["keep_batchnorm_fp32"],
+        #         loss_scale=self.config['apex']["loss_scale"],
+        #     )
+        #     amp.load_state_dict(continue_state_object['amp'])
 
-        if self.distributed:
-            self.model = DistributedDataParallel(self.model)
+        # if self.distributed:
+        #     self.model = DistributedDataParallel(self.model)
 
         self.optimizer.load_state_dict(continue_state_object['optimizer'])
         self.lr_policy.load_state_dict(continue_state_object['lr_policy'])
@@ -238,11 +238,11 @@ class Solver(object):
         loss /= self.step_decay
 
         # backward
-        if self.distributed and self.config['apex']['amp_used']:
-            with amp.scale_loss(loss, self.optimizer) as scaled_loss:
-                scaled_loss.backward()
-        else:
-            loss.backward()
+        # if self.distributed and self.config['apex']['amp_used']:
+        #     with amp.scale_loss(loss, self.optimizer) as scaled_loss:
+        #         scaled_loss.backward()
+        # else:
+        loss.backward()
 
         if self.iteration % self.step_decay == 0:
             if self.use_grad_clip:
@@ -292,8 +292,8 @@ class Solver(object):
                     key = k[7:]
                 new_state_dict[key] = v
 
-            if self.config['apex']['amp_used']:
-                state_dict['amp'] = amp.state_dict()
+            # if self.config['apex']['amp_used']:
+            #     state_dict['amp'] = amp.state_dict()
             state_dict['config'] = self.config
             state_dict['model'] = new_state_dict
             state_dict['optimizer'] = self.optimizer.state_dict()

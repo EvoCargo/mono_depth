@@ -151,6 +151,8 @@ pretrained/
 # Output
 *.tiberius
 log/
+wandb/
+snaps/
 
 # Model weights
 *.pt

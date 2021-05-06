@@ -435,7 +435,7 @@ if __name__ == '__main__':
         help="Use same LR for all param groups",
     )
     parser.add_argument(
-        "--distributed", default=True, action="store_true", help="Use DDP if set"
+        "--distributed", default=False, action="store_true", help="Use DDP if set"
     )
     parser.add_argument(
         "--root", default=".", type=str, help="Root folder to save data in"
@@ -556,11 +556,8 @@ if __name__ == '__main__':
 
     if args.distributed:
         mp.set_start_method('forkserver')
-
-        print(args.rank)
         port = np.random.randint(15000, 15025)
         args.dist_url = 'tcp://{}:{}'.format(nodes[0], port)
-        print(args.dist_url)
         args.dist_backend = 'nccl'
         args.gpu = None
 

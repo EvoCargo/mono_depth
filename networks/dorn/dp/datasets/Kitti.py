@@ -16,12 +16,23 @@ class Kitti(BaseDataset):
         self, config, is_train=True, image_loader=PILLoader, depth_loader=KittiDepthLoader
     ):
         super().__init__(config, is_train, image_loader, depth_loader)
-        file_list = "./dp/datasets/lists/kitti_{}.list".format(self.split)
+        file_list = "/home/penitto/mono_depth/networks/dorn/dp/datasets/lists/kitti_{}.list".format(
+            self.split
+        )
         with open(file_list, "r") as f:
             self.filenames = f.readlines()
 
     def _parse_path(self, index):
         image_path, depth_path = self.filenames[index].split()
+        image_path = os.path.join(
+            image_path.split('/')[2][:10], *image_path.split('/')[2:]
+        )
+
+        depth_path = os.path.join(
+            depth_path.split('/')[2][:10], *depth_path.split('/')[2:]
+        )
+        # print(image_path)
+
         image_path = os.path.join(self.root, image_path)
         depth_path = os.path.join(self.root, depth_path)
         return image_path, depth_path
@@ -31,6 +42,9 @@ class Kitti(BaseDataset):
         # resize
         W, H = image.size
         dH, dW = depth.shape
+        scale = max(crop_h / H, 1.0)
+
+        # print('Preprocess: ', W, H, dW, dH)
 
         assert (
             W == dW and H == dH
@@ -38,34 +52,36 @@ class Kitti(BaseDataset):
             (H, W), (dH, dW)
         )
 
-        # scale_h, scale_w = max(crop_h/H, 1.0), max(crop_w/W, 1.0)
-        # scale = max(scale_h, scale_w)
-        # H, W = math.ceil(scale*H), math.ceil(scale*W)
-        # H, W = max(int(scale*H), crop_h), max(int(scale*W), crop_w)
+        top_margin = int(H - 352)
+        left_margin = int((W - 1216) / 2)
+        image = image.crop(
+            (left_margin, top_margin, left_margin + 1216, top_margin + 352)
+        )
+        depth = depth[
+            top_margin : top_margin + 352,
+            left_margin : left_margin + 1216,
+        ]
 
-        # print("w={}, h={}".format(W, H))
-        scale = max(crop_h / H, 1.0)
-        H, W = max(crop_h, H), math.ceil(scale * W)
-        image = image.resize((W, H), Image.BILINEAR)
-        # depth = cv2.resize(depth, (W, H), cv2.INTER_LINEAR)
-        # print("image shape:", image.size, " depth shape:", depth.shape)
-
-        crop_dh, crop_dw = int(crop_h / scale), int(crop_w / scale)
+        # scale = max(crop_h / H, 1.0)
+        # H, W = max(crop_h, H), math.ceil(scale * W)
+        # image = image.resize((W, H), Image.BILINEAR)
+        # # depth = cv2.resize(depth, (W, H), cv2.INTER_LINEAR)
+        # # print("image shape:", image.size, " depth shape:", depth.shape)
 
         # random crop size
-        x = random.randint(0, W - crop_w)
-        y = random.randint(0, H - crop_h)
-        dx, dy = math.floor(x / scale), math.floor(y / scale)
-        # print("corp dh = {}, crop dw = {}".format(crop_dh, crop_dw))
+        x = random.randint(0, image.size[0] - crop_w)
+        y = 0
+        dx, dy = math.floor(x / scale), 0
 
         image = image.crop((x, y, x + crop_w, y + crop_h))
-        depth = depth[dy : dy + crop_dh, dx : dx + crop_dw]
-        # print("depth shape: ", depth.shape)
+        depth = depth[dy : dy + crop_h, dx : dx + crop_w]
 
         # normalize
         image = np.asarray(image).astype(np.float32) / 255.0
         image = nomalize(image, type=self.config['norm_type'])
         image = image.transpose(2, 0, 1)
+
+        # print('After preprocess: ', image.shape, depth.shape)
 
         return image, depth, None
 
@@ -111,5 +127,7 @@ class Kitti(BaseDataset):
         image = image.transpose(2, 0, 1)
 
         output_dict = {"image_n": image_n}
+
+        # print('Test:', image.shape)
 
         return image, depth, output_dict

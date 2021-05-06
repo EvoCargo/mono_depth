@@ -26,8 +26,6 @@ In this repo we try to implement next networks for our task:
 
     * AdaBins [[paper](https://arxiv.org/pdf/2011.14141v1.pdf)] [[code](https://github.com/shariqfarooq123/AdaBins)]
 
-    * DPT [[paper](https://arxiv.org/pdf/2103.13413.pdf)] [[code](https://github.com/intel-isl/DPT)]
-
 # Datasets
 
 There are 3 datasets available for our task:
@@ -84,20 +82,11 @@ FastDepth | [mobilenet-nnconv5-dw](https://drive.google.com/u/0/uc?id=12n25k8e5q
 FastDepth | [mobilenet-nnconv5-dw-sc](https://drive.google.com/u/0/uc?id=1dB6J6x_vrsDo4-M1fO5HxO8Z0sgUFcpN&export=download) | Model with pretrained MobileNet as encoder, smth else and skip-connections
 FastDepth | [mobilenet-nnconv5-dw-sc-pn](https://drive.google.com/u/0/uc?id=1G2ZyS63FMwR9uX-criPC0IVDLYSfW6xK&export=download) | Model with pretrained MobileNet as encoder, smth else, skip-connections and pruned
 FeatDepth | [autoencoder](https://drive.google.com/u/0/uc?export=download&confirm=i2Xd&id=1TZ-piXUlLfJhiN-OUC-sDoICUXlzXknn) | Autoencoder trained on the kitti raw data
-FeatDepth | [depth_odom](https://drive.google.com/u/0/uc?export=download&confirm=KRD3&id=1rsZ7SgjNEmwEXufKh8PAlooZ5gNTEKsX) | Model pretrained on KITTI odometry data
 FeatDepth | [depth_refine](https://drive.google.com/u/0/uc?export=download&confirm=t9pL&id=1vIh9NnwvgsnMyjHLsSbLhbvtgSIHalZz) | Model finetuned on test split of KITTI by online refinement
 FeatDepth | [depth](https://drive.google.com/u/0/uc?export=download&confirm=ogKI&id=1EQdJAF6Ew64_kFGmKwKMP2r7wnKnJuWn) | Model trained on KITTI
 MonoDepth2 | [mono_640x192](https://drive.google.com/u/0/uc?export=download&confirm=hlYX&id=1gVv4kb1_9H_boQAVTd3BzFmWxzbivS6P) | Imagenet pretrained model with resolution 640x192 and mono as source
-MonoDepth2 | [stereo_640x192](https://drive.google.com/u/0/uc?export=download&confirm=neJi&id=1-aWu7lKQRNnygr3vAta8-vZx_ahYExlI) | Imagenet pretrained model with resolution 640x192 and stereo as source
-MonoDepth2 | [mono+stereo_640x192](https://drive.google.com/u/0/uc?export=download&confirm=MTKo&id=1DziaSK4oT01D2ug038JvfkJIUIOLcbt8) | Imagenet pretrained model with resolution 640x192 and mono and stereo as source
 MonoDepth2 | [mono_1024x320](https://drive.google.com/u/0/uc?export=download&confirm=62us&id=1_p7T4BKKSIbJ_92cV_9LzbXdgWCut1Ay) | Imagenet pretrained model with resolution 1024x320 and mono as source
-MonoDepth2 | [stereo_1024x320](https://drive.google.com/u/0/uc?export=download&confirm=G-Oy&id=1z4q4xo1sI2Qyukxbwv8E_hYeWvarNfQ8) | Imagenet pretrained model with resolution 1024x320 and stereo as source
-MonoDepth2 | [mono+stereo_1024x320](https://drive.google.com/u/0/uc?export=download&confirm=8nq8&id=1KmtNclGufmFq-XoKqL3dy2Uppwcfkj4e) | Imagenet pretrained model with resolution 1024x320 and mono and stereo as source
 MonoDepth2 | [mono_no_pt_640x192](https://drive.google.com/u/0/uc?export=download&confirm=8SMG&id=1ubu-AAoxr3wVmKS77wEGrB56Anb8mmxO) | Model with resolution 640x192 and mono as source without pretrained Imagenet
-MonoDepth2 | [stereo_no_pt_640x192](https://drive.google.com/u/0/uc?export=download&confirm=Pmut&id=1tDpF5qVgWFdOkbeWRDTNCZx3wCCPEec_) | Model with resolution 640x192 and stereo as source without pretrained Imagenet
-MonoDepth2 | [mono+stereo_no_pt_640x192](https://drive.google.com/u/0/uc?export=download&confirm=vn7L&id=1v9wBGVKvm75LSmrys3vmmiSeHmU1xC4o) | Model with resolution 640x192 and mono and stereo as source without pretrained Imagenet
-MonoDepth2 | [mono_odom_640x192](https://drive.google.com/u/0/uc?export=download&confirm=2iWf&id=16TxTfVc7E90rQqrSWaB53Fa-U58arKLT) | Model with resolution 640x192 and mono as source trained on odometry
-MonoDepth2 | [mono+stereo_odom_640x192](https://drive.google.com/u/0/uc?export=download&confirm=s2NN&id=1RzwNhlecp7nPx_ul992GRhLw58ammRkg) | Model with resolution 640x192 and mono and stereo as source trained on odometry
 MonoDepth2 | [mono_resnet50_640x192](https://drive.google.com/u/0/uc?export=download&confirm=B8hW&id=1fwWnoHNhippOPKvAs0Wv3L1vzliJyYBj) | Model with resolution 640x192 and mono as source on resnet50 with Imagenet
 MonoDepth2 | [mono_resnet50_no_pt_640x192](https://drive.google.com/u/0/uc?export=download&confirm=vMBg&id=1se52I8K5cyEuB_vXtMmGJFkwlTHYywRH) | Model with resolution 640x192 and mono and stereo as source on resnet50 without Imagenet
 
@@ -145,10 +134,14 @@ Monodepth2 | NaN | NaN | NaN
 
 # TODO ❗❗❗
 
-* Eval for monodepth2
+* __Adabins__: правильно установить pytorch3d + дообучить + eval
 
-* Evo dataset for bts
+* __Monodepth__: eval
 
-* Finetune for bts
+* __BTS__: evo датасет + дообучение + eval
 
-* Other networks
+* __DORN__: train + finetune + eval
+
+* __Featdepth__:
+
+* __Fastdepth__: train kitti/use pretrained nyu2 + finetune + eval

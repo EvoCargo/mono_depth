@@ -150,15 +150,16 @@ class ResNet(nn.Module):
         x3 = self.layer2(x2)
         x4 = self.layer3(x3)
         x5 = self.layer4(x4)
-        feats = dict(
-            conv_feat=x0,
-            pool_feat=x1,
-            layer1_feat=x2,
-            layer2_feat=x3,
-            layer3_feat=x4,
-            layer4_feat=x5,
-        )
-        return feats
+        # feats = dict(
+        #     conv_feat=x0,
+        #     pool_feat=x1,
+        #     layer1_feat=x2,
+        #     layer2_feat=x3,
+        #     layer3_feat=x4,
+        #     layer4_feat=x5,
+        # )
+        return x5
+        # return feats
 
     def freeze(self):
         for m in self.modules():
@@ -174,8 +175,8 @@ class ResNetBackbone(nn.Module):
         if pretrained:
             # saved_state_dict = torch.load('./network/pretrained_models/resnet101-imagenet.pth')
             saved_state_dict = torch.load(
-                './dp/modules/backbones/pretrained_models/resnet101_v1c.pth',
-                map_location="cpu",
+                '/home/penitto/mono_depth/networks/dorn/pretrained/resnet/resnet101_v1c.pth',
+                map_location="cuda:0",
             )
             new_params = self.backbone.state_dict().copy()
             for i in saved_state_dict:

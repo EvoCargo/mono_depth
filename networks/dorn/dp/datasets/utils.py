@@ -19,6 +19,8 @@ def KittiDepthLoader(file):
 
     depth = depth_png.astype(np.float) / 256.0
     depth[depth_png == 0] = -1.0
+
+    # print(file, depth.shape)
     return depth
 
 

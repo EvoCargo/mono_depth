@@ -25,6 +25,7 @@ openpyxl = "^3.0.7"
 tensorboardX = "^2.2"
 h5py = "^3.2.1"
 wandb = "^0.10.27"
+apex = "^0.9.10-alpha.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

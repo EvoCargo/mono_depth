@@ -3,7 +3,7 @@ environ:
   deterministic: False
 model:
   name: "drn"
-  pretrained_model:
+  pretrained_model: "/home/penitto/mono_depth/networks/dorn/pretrained/resnet/resnet.pth"
   params:
     input_size: [385, 513]
     kernel_size: 16
@@ -13,7 +13,7 @@ model:
 data:
   name: "Kitti"
   split: ["trainval", "selected_val"]
-  path: '/data/wangxin/KITTI'
+  path: '/media/data/datasets/penitto/kitti'
   tr_crop_size: [385, 513]
   te_crop_size: [385, 513]
   imagenet_normalize: True

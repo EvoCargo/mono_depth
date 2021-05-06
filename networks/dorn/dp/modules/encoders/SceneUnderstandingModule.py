@@ -97,6 +97,8 @@ class SceneUnderstandingModule(nn.Module):
         )
 
     def forward(self, x):
+        # print(type(x))
+        # print(x.keys())
         N, C, H, W = x.shape
         x1 = self.encoder(x)
         x1 = F.interpolate(x1, size=(H, W), mode="bilinear", align_corners=True)

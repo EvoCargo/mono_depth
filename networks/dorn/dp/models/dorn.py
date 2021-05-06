@@ -46,7 +46,6 @@ class DepthPredModel(nn.Module):
 
     def optimizer_params(self):
         group_params = [
-            {"params": filter(lambda p: p.requires_grad, self.backbone.parameters())},
             {
                 "params": filter(
                     lambda p: p.requires_grad, self.SceneUnderstandingModule.parameters()
@@ -68,6 +67,7 @@ class DepthPredModel(nn.Module):
         """
         N, C, H, W = image.shape
         feat = self.backbone(image)
+        # print(feat)
         feat = self.SceneUnderstandingModule(feat)
         # print("feat shape:", feat.shape)
         # feat = F.interpolate(feat, size=(H, W), mode="bilinear", align_corners=True)
