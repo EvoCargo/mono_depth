@@ -145,3 +145,5 @@ Monodepth2 | NaN | NaN | NaN
 * __Featdepth__:
 
 * __Fastdepth__: train kitti/use pretrained nyu2 + finetune + eval
+
+* __Global__: fix downloads + global scripts like `train.py`

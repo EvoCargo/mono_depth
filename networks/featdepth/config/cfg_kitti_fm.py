@@ -1,24 +1,19 @@
 DEPTH_LAYERS = 50  # resnet50
 POSE_LAYERS = 18  # resnet18
-FRAME_IDS = [
-    0,
-    -1,
-    1,
-    's',
-]  # 0 refers to current frame, -1 and 1 refer to temperally adjacent frames, 's' refers to stereo adjacent frame.
-IMGS_PER_GPU = 2  # the number of images fed to each GPU
-HEIGHT = 320  # input image height
-WIDTH = 1024  # input image width
+FRAME_IDS = [0, -1, 1]
+IMGS_PER_GPU = 4  # the number of images fed to each GPU
+HEIGHT = 192  # input image height
+WIDTH = 640  # input image width
 
 data = dict(
     name='kitti',  # dataset name
-    split='exp',  # training split name
+    split='benchmark',  # training split name
     height=HEIGHT,
     width=WIDTH,
     frame_ids=FRAME_IDS,
-    in_path='/media/sconly/harddisk/data/kitti/kitti_raw/rawdata',  # path to raw data
-    gt_depth_path='/media/sconly/harddisk/data/kitti/kitti_raw/rawdata/gt_depths.npz',  # path to gt data
-    png=False,  # image format
+    in_path='/media/data/datasets/penitto/kitti',  # path to raw data
+    # gt_depth_path='/media/sconly/harddisk/data/kitti/kitti_raw/rawdata/gt_depths.npz',  # path to gt data
+    png=True,  # image format
     stereo_scale=True if 's' in FRAME_IDS else False,
 )
 
@@ -33,13 +28,13 @@ model = dict(
     scales=[0, 1, 2, 3],  # output different scales of depth maps
     min_depth=0.1,  # minimum of predicted depth value
     max_depth=100.0,  # maximum of predicted depth value
-    depth_pretrained_path='/media/sconly/harddisk/weight/resnet/resnet{}.pth'.format(
+    depth_pretrained_path='/home/penitto/mono_depth/networks/featdepth/pretrained/resnets/resnet{}.pth'.format(
         DEPTH_LAYERS
     ),  # pretrained weights for resnet
-    pose_pretrained_path='/media/sconly/harddisk/weight/resnet/resnet{}.pth'.format(
+    pose_pretrained_path='/home/penitto/mono_depth/networks/featdepth/pretrained/resnets/resnet{}.pth'.format(
         POSE_LAYERS
     ),  # pretrained weights for resnet
-    extractor_pretrained_path='/media/sconly/harddisk/weight/autoencoder.pth',  # pretrained weights for autoencoder
+    extractor_pretrained_path='/home/penitto/mono_depth/networks/featdepth/pretrained/autoencoder/autoencoder.pth',  # pretrained weights for autoencoder
     automask=False if 's' in FRAME_IDS else True,
     disp_norm=False if 's' in FRAME_IDS else True,
     perception_weight=1e-3,

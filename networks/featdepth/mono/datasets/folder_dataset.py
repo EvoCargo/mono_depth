@@ -11,8 +11,6 @@ from torchvision import transforms
 
 
 def pil_loader(filename):
-    # open path as file to avoid ResourceWarning
-    # (https://github.com/python-pillow/Pillow/issues/835)
     with open(filename, 'rb') as f:
         with Image.open(f) as img:
             return img.convert('RGB')
@@ -45,13 +43,13 @@ class FolderDataset(data.Dataset):
     ):
         super(FolderDataset, self).__init__()
 
+        self.interp = Image.ANTIALIAS
         self.data_path = data_path
         self.filenames = sorted(os.listdir(data_path))
         self.height = height
         self.width = width
-        self.interp = Image.ANTIALIAS
-        self.is_train = is_train
         self.frame_idxs = frame_idxs
+        self.is_train = is_train
         self.loader = pil_loader
         self.to_tensor = transforms.ToTensor()
         self.K = np.array(

@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
-# Author: Duanzhixiang(zhixiangduan@deepmotion.ai)
 
 import os
 
@@ -21,6 +20,10 @@ def get_dataset(cfg, training=True):
         from .eth3d_dataset import FolderDataset as dataset
     elif dataset_name == 'euroc':
         from .euroc_dataset import FolderDataset as dataset
+    elif dataset_name == 'kitti_depth':
+        from .kitti_dataset import KITTIDepthDataset as dataset
+    elif dataset_name == 'evo':
+        from .kitti_dataset import EvoDataset as dataset
 
     fpath = os.path.join(os.path.dirname(__file__), "splits", cfg.split, "{}_files.txt")
     filenames = (
@@ -36,6 +39,6 @@ def get_dataset(cfg, training=True):
         cfg.frame_ids if training else [0],
         is_train=training,
         img_ext=img_ext,
-        gt_depth_path=cfg.gt_depth_path,
+        # gt_depth_path=cfg.gt_depth_path,
     )
     return dataset

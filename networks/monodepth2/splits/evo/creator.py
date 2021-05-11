@@ -16,8 +16,15 @@ train_list = [
     'kalibr_03_2020-05-22_kalibr_2020-05-22-18-40-28_full_route_high_speed',
     'kalibr_03_2020-06-01_kalibr_2020-06-01-16-38-16_0',
     'kalibr_04_2020-12-03_2020-12-03-13-26-10_0_ZED',
-    'kapotnya_02_2020-02-26_kapotnya_2020-02-26-15-09-42_0',
-    'kapotnya_02_2020-02-26_kapotnya_2020-02-26-15-27-06_0',
+]
+
+test_list = [
+    'ckad_01_ckad_2020-10-29-17-01-56_0',
+    'hospital_01_2020-07-14-16-59-35_0',
+    'ipcp_03_2020-06-23_ipcp_2020-06-23-16-48-18_0',
+    'ipcp_03_2020-08-19_ipcp_2020-08-19-20-23-09_0',
+    'kalibr_04_2021-01-18_snow_2021-01-18-15-29-39_0',
+    'kalibr_04_2021-01-18_snow_2021-01-18-15-37-39_0',
 ]
 
 
@@ -61,7 +68,7 @@ def get_images_paths(path: Path):
 
 global_df = get_images_paths(global_path)
 train = global_df[global_df['parent_folder'].isin(train_list)]
-test = global_df[~global_df['parent_folder'].isin(train_list)]
+test = global_df[global_df['parent_folder'].isin(test_list)]
 
 
 train[['image_mod', 'ind']].to_csv(

@@ -92,8 +92,8 @@ if is_main_process:
 
 for epoch in range(solver.epoch + 1, config['solver']['epochs'] + 1):
     solver.before_epoch(epoch=epoch)
-    if solver.distributed:
-        sampler.set_epoch(epoch)
+    # if solver.distributed:
+    #     sampler.set_epoch(epoch)
 
     if is_main_process:
         bar_format = '{desc}[{elapsed}<{remaining},{rate_fmt}]'

@@ -13,7 +13,8 @@ import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
 import torch.distributed as dist
-import torch.multiprocessing as mp
+
+# import torch.multiprocessing as mp
 import torch.nn as nn
 
 # import torch.nn.utils as utils
@@ -474,17 +475,17 @@ def main_worker(gpu, ngpus_per_node, args):
     if args.gpu is not None:
         print("Use GPU: {} for training".format(args.gpu))
 
-    if args.distributed:
-        if args.dist_url == "env://" and args.rank == -1:
-            args.rank = int(os.environ["RANK"])
-        if args.multiprocessing_distributed:
-            args.rank = args.rank * ngpus_per_node + gpu
-        dist.init_process_group(
-            backend=args.dist_backend,
-            init_method=args.dist_url,
-            world_size=args.world_size,
-            rank=args.rank,
-        )
+    # if args.distributed:
+    #     if args.dist_url == "env://" and args.rank == -1:
+    #         args.rank = int(os.environ["RANK"])
+    #     if args.multiprocessing_distributed:
+    #         args.rank = args.rank * ngpus_per_node + gpu
+    #     dist.init_process_group(
+    #         backend=args.dist_backend,
+    #         init_method=args.dist_url,
+    #         world_size=args.world_size,
+    #         rank=args.rank,
+    #     )
 
     # Create model
     model = BtsModel(args)
@@ -500,27 +501,27 @@ def main_worker(gpu, ngpus_per_node, args):
     )
     print("Total number of learning parameters: {}".format(num_params_update))
 
-    if args.distributed:
-        if args.gpu is not None:
-            torch.cuda.set_device(args.gpu)
-            model.cuda(args.gpu)
-            args.batch_size = int(args.batch_size / ngpus_per_node)
-            model = nn.parallel.DistributedDataParallel(
-                model, device_ids=[args.gpu], find_unused_parameters=True
-            )
-        else:
-            model.cuda()
-            model = nn.parallel.DistributedDataParallel(
-                model, find_unused_parameters=True
-            )
-    else:
-        model = nn.DataParallel(model)
-        model.cuda()
+    # if args.distributed:
+    #     if args.gpu is not None:
+    #         torch.cuda.set_device(args.gpu)
+    #         model.cuda(args.gpu)
+    #         args.batch_size = int(args.batch_size / ngpus_per_node)
+    #         model = nn.parallel.DistributedDataParallel(
+    #             model, device_ids=[args.gpu], find_unused_parameters=True
+    #         )
+    #     else:
+    #         model.cuda()
+    #         model = nn.parallel.DistributedDataParallel(
+    #             model, find_unused_parameters=True
+    #         )
+    # else:
+    model = nn.DataParallel(model)
+    model.cuda()
 
-    if args.distributed:
-        print("Model Initialized on GPU: {}".format(args.gpu))
-    else:
-        print("Model Initialized")
+    # if args.distributed:
+    #     print("Model Initialized on GPU: {}".format(args.gpu))
+    # else:
+    print("Model Initialized")
 
     global_step = 0
     best_eval_measures_lower_better = torch.zeros(6).cpu() + 1e3
@@ -621,8 +622,8 @@ def main_worker(gpu, ngpus_per_node, args):
     epoch = global_step // steps_per_epoch
 
     while epoch < args.num_epochs:
-        if args.distributed:
-            dataloader.train_sampler.set_epoch(epoch)
+        # if args.distributed:
+        #     dataloader.train_sampler.set_epoch(epoch)
 
         for step, sample_batched in enumerate(dataloader.data):
             optimizer.zero_grad()
@@ -640,10 +641,10 @@ def main_worker(gpu, ngpus_per_node, args):
 
             lpg8x8, lpg4x4, lpg2x2, reduc1x1, depth_est = model(image, focal)
 
-            if args.dataset == 'nyu':
-                mask = depth_gt > 0.1
-            else:
-                mask = depth_gt > 1.0
+            # if args.dataset == 'nyu':
+            #     mask = depth_gt > 0.1
+            # else:
+            mask = depth_gt > 1.0
 
             loss = silog_criterion.forward(depth_est, depth_gt, mask.to(torch.bool))
             loss.backward()
@@ -866,14 +867,14 @@ def main():
         os.system(command)
 
     torch.cuda.empty_cache()
-    args.distributed = args.world_size > 1 or args.multiprocessing_distributed
+    # args.distributed = args.world_size > 1 or args.multiprocessing_distributed
 
     ngpus_per_node = torch.cuda.device_count()
-    if ngpus_per_node > 1 and not args.multiprocessing_distributed:
-        print(
-            "This machine has more than 1 gpu. Please specify --multiprocessing_distributed, or set \'CUDA_VISIBLE_DEVICES=0\'"
-        )
-        return -1
+    # if ngpus_per_node > 1 and not args.multiprocessing_distributed:
+    #     print(
+    #         "This machine has more than 1 gpu. Please specify --multiprocessing_distributed, or set \'CUDA_VISIBLE_DEVICES=0\'"
+    #     )
+    #     return -1
 
     if args.do_online_eval:
         print("You have specified --do_online_eval.")
@@ -883,11 +884,11 @@ def main():
             )
         )
 
-    if args.multiprocessing_distributed:
-        args.world_size = ngpus_per_node * args.world_size
-        mp.spawn(main_worker, nprocs=ngpus_per_node, args=(ngpus_per_node, args))
-    else:
-        main_worker(args.gpu, ngpus_per_node, args)
+    # if args.multiprocessing_distributed:
+    #     args.world_size = ngpus_per_node * args.world_size
+    #     mp.spawn(main_worker, nprocs=ngpus_per_node, args=(ngpus_per_node, args))
+    # else:
+    main_worker(args.gpu, ngpus_per_node, args)
 
 
 if __name__ == '__main__':

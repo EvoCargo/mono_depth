@@ -1,19 +1,19 @@
 DEPTH_LAYERS = 50
 POSE_LAYERS = 18
-FRAME_IDS = [0, -1, 1, 's']
+FRAME_IDS = [0, -1, 1]
 IMGS_PER_GPU = 2
 HEIGHT = 192  # 320
 WIDTH = 640  # 1024
 
 data = dict(
     name='kitti',
-    split='exp',
+    split='benchmark',
     height=HEIGHT,
     width=WIDTH,
     frame_ids=FRAME_IDS,
-    in_path='/media/user/harddisk/data/kitti/kitti_raw/rawdata',
-    gt_depth_path='/media/user/harddisk/data/kitti/kitti_raw/rawdata/gt_depths.npz',
-    png=False,
+    in_path='/media/data/datasets/penitto/kitti',
+    # gt_depth_path='/media/user/harddisk/data/kitti/kitti_raw/rawdata/gt_depths.npz',
+    png=True,
     stereo_scale=True if 's' in FRAME_IDS else False,
 )
 
@@ -28,10 +28,10 @@ model = dict(
     scales=[0, 1, 2, 3],
     min_depth=0.1,
     max_depth=100.0,
-    depth_pretrained_path='/media/user/harddisk/weight/resnet/resnet{}.pth'.format(
+    depth_pretrained_path='/home/penitto/mono_depth/networks/featdepth/pretrained/resnets/resnet{}.pth'.format(
         DEPTH_LAYERS
     ),
-    pose_pretrained_path='/media/user/harddisk/weight/resnet/resnet{}.pth'.format(
+    pose_pretrained_path='/home/penitto/mono_depth/networks/featdepth/pretrained/resnets/resnet{}.pth'.format(
         POSE_LAYERS
     ),
     extractor_pretrained_path='/media/user/harddisk/weight/autoencoder.pth',

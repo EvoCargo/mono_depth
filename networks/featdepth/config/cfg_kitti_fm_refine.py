@@ -1,9 +1,9 @@
 DEPTH_LAYERS = 50
 POSE_LAYERS = 18
-FRAME_IDS = [0, -1, 1, 's']
+FRAME_IDS = [0, -1, 1]
 IMGS_PER_GPU = 2
-HEIGHT = 320
-WIDTH = 1024
+HEIGHT = 192
+WIDTH = 640
 
 data = dict(
     name='kitti',
@@ -11,9 +11,9 @@ data = dict(
     height=HEIGHT,
     width=WIDTH,
     frame_ids=FRAME_IDS,
-    in_path='/node01_data5/kitti_raw',  # path to kitti raw data
-    gt_depth_path='/node01_data5/monodepth2-test/monodepth2/gt_depths.npz',  # path to kitti depth ground truth
-    png=False,
+    in_path='/media/data/datasets/penitto/kitti',
+    # gt_depth_path='/node01_data5/monodepth2-test/monodepth2/gt_depths.npz',  # path to kitti depth ground truth
+    png=True,
     stereo_scale=True if 's' in FRAME_IDS else False,
 )
 
@@ -28,13 +28,13 @@ model = dict(
     scales=[0, 1, 2, 3],
     min_depth=0.1,
     max_depth=100.0,
-    depth_pretrained_path='/node01/jobs/io/pretrained/checkpoints/resnet/resnet{}.pth'.format(
+    depth_pretrained_path='/home/penitto/mono_depth/networks/featdepth/pretrained/resnets/resnet{}.pth'.format(
         DEPTH_LAYERS
     ),  # path to pre-trained resnet weights
-    pose_pretrained_path='/node01/jobs/io/pretrained/checkpoints/resnet/resnet{}.pth'.format(
+    pose_pretrained_path='/home/penitto/mono_depth/networks/featdepth/pretrained/resnets/resnet{}.pth'.format(
         POSE_LAYERS
     ),  # path to pre-trained resnet weights
-    extractor_pretrained_path='/node01/jobs/io/out/changshu/autoencoder3/epoch_30.pth',
+    extractor_pretrained_path='/home/penitto/mono_depth/networks/featdepth/pretrained/autoencoder/autoencoder.pth',
     automask=False if 's' in FRAME_IDS else True,
     disp_norm=False if 's' in FRAME_IDS else True,
     perception_weight=1e-3,
@@ -42,12 +42,15 @@ model = dict(
 )
 
 # path to the weights trained on the kitti raw data training split
-resume_from = '/node01_data5/monodepth2-test/model/wow_320_1024/epoch_40.pth'  # we will resume from current epoch for further online refinement
-total_epochs = (
-    60  # this value must be bigger than the epochs of the weight you resume from
-)
+# resume_from = '/home/penitto/mono_depth/networks/featdepth/pretrained/depth/depth.pth'  # we will resume from current epoch for further online refinement
+# total_epochs = (
+# 60  # this value must be bigger than the epochs of the weight you resume from
+# )
 # for example, you have trained 40 epoches on kitti raw data, and use this weight for resuming.
 # When resuming, the program will start from epoch 41 and finish the rest of epoches (total_epochs - 40)
+resume_from = None
+total_epochs = 60
+finetune = '/home/penitto/mono_depth/networks/featdepth/pretrained/depth/depth.pth'
 imgs_per_gpu = IMGS_PER_GPU
 learning_rate = 1e-4
 workers_per_gpu = 4

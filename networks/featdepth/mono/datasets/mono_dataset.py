@@ -10,8 +10,6 @@ from torchvision import transforms
 
 
 def pil_loader(path):
-    # open path as file to avoid ResourceWarning
-    # (https://github.com/python-pillow/Pillow/issues/835)
     with open(path, 'rb') as f:
         with Image.open(f) as img:
             return img.convert('RGB')
@@ -43,6 +41,7 @@ class MonoDataset(data.Dataset):
         gt_depth_path=None,
     ):
         super(MonoDataset, self).__init__()
+
         self.interp = Image.ANTIALIAS
         self.data_path = data_path
         self.filenames = filenames

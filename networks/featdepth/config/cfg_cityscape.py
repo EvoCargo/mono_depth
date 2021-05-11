@@ -22,7 +22,7 @@ pose_pretrained_path = (
     '/node01/jobs/io/pretrained/checkpoints/resnet/resnet{}.pth'.format(pose_num_layers)
 )
 
-in_path = '/ssd/Cityscapes'
+in_path = '/media/data/datasets/penitto/cityscapes'
 gt_depth_path = '/node01_data5/monodepth2-test/monodepth2/gt_depths.npz'
 checkpoint_path = '/node01_data5/monodepth2-test/model/refine/smallfigure.pth'
 

@@ -2442,7 +2442,7 @@ testing = ["pytest", "pytest-cover", "coverage (>=5.0)"]
 
 [[package]]
 name = "wandb"
-version = "0.10.27"
+version = "0.10.30"
 description = "A CLI and library for interacting with the Weights and Biases API."
 category = "main"
 optional = false
@@ -4154,8 +4154,8 @@ waitress = [
     {file = "waitress-2.0.0.tar.gz", hash = "sha256:69e1f242c7f80273490d3403c3976f3ac3b26e289856936d1f620ed48f321897"},
 ]
 wandb = [
-    {file = "wandb-0.10.27-py2.py3-none-any.whl", hash = "sha256:f591bb9d5c402ec5c12bd823db913d49ac31e4068f2c35c50b6f13e4fcd717b4"},
-    {file = "wandb-0.10.27.tar.gz", hash = "sha256:1b6d3bbfd644183bbd79a02ff9e57e65a8a4f7c9b770af0d3c4f961ae6d7fc73"},
+    {file = "wandb-0.10.30-py2.py3-none-any.whl", hash = "sha256:b3108a2d347fe7a522b29eb9d85ffa10930e6fc5dc4d9fa8b1d828a4fd705b0f"},
+    {file = "wandb-0.10.30.tar.gz", hash = "sha256:94e1989aabefb9068c8d8c5307dc2303fc352a2f856d82f561dd8c7ad59163f0"},
 ]
 wcwidth = [
     {file = "wcwidth-0.2.5-py2.py3-none-any.whl", hash = "sha256:beb4802a9cebb9144e99086eff703a642a13d6a0052920003a230f3294bbe784"},

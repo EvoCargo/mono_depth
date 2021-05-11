@@ -13,7 +13,7 @@ import torch.distributed as dist
 from dp.core.lr_policys import _get_lr_policy
 from dp.core.optimizers import _get_optimizer
 from dp.models import _get_model
-from dp.utils.comm import reduce_tensor, synchronize
+from dp.utils.comm import synchronize
 from dp.utils.pyt_io import load_model
 from dp.utils.pyt_ops import tensor2cuda
 from dp.version import __version__
@@ -251,10 +251,10 @@ class Solver(object):
             self.optimizer.zero_grad()
             self.lr_policy.step(self.epoch)
 
-        if self.distributed:
-            reduced_loss = reduce_tensor(loss.data, self.world_size)
-        else:
-            reduced_loss = loss.data
+        # if self.distributed:
+        #     reduced_loss = reduce_tensor(loss.data, self.world_size)
+        # else:
+        reduced_loss = loss.data
         return reduced_loss
 
     def step_no_grad(self, **kwargs):
