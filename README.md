@@ -134,16 +134,16 @@ Monodepth2 | NaN | NaN | NaN
 
 # TODO ❗❗❗
 
+* __Monodepth__: исправить матрицу для evo
+
 * __Adabins__: правильно установить pytorch3d + дообучить + eval
 
-* __Monodepth__: eval
-
-* __BTS__: evo датасет + дообучение + eval
+* __BTS__: evo датасет с фокальным + eval до дообучения + дообучение + eval после дообучения
 
 * __DORN__: train + finetune + eval
 
-* __Featdepth__:
+<!-- * __Featdepth__: -->
 
-* __Fastdepth__: train kitti/use pretrained nyu2 + finetune + eval
+<!-- * __Fastdepth__: train kitti/use pretrained nyu2 + finetune + eval -->
 
 * __Global__: fix downloads + global scripts like `train.py`

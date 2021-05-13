@@ -144,6 +144,11 @@ class EvoDataset(KITTIDataset):
     def __init__(self, *args, **kwargs):
         super(EvoDataset, self).__init__(*args, **kwargs)
 
+        # self.K = np.array(
+        #     [[0.58, 0, 0.5, 0], [0, 1.92, 0.5, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
+        #     dtype=np.float32,
+        # )
+
         def mask_first_last(x):
             result = np.ones_like(x)
             result[0] = 0
@@ -163,6 +168,9 @@ class EvoDataset(KITTIDataset):
         )
         self.mod_filenames = self.filenames.loc[mask]
         self.mod_filenames.reset_index(drop=True, inplace=True)
+
+    def check_depth(self):
+        return True
 
     def get_image_path(self, folder, frame_index, side):
         f_str = "{}_{:19d}.jpg".format(folder, frame_index)
@@ -244,7 +252,7 @@ class EvoDataset(KITTIDataset):
         return len(self.mod_filenames)
 
     def get_depth(self, folder, frame_index, side, do_flip):
-        f_str = "{}_{:19d}.png".format(folder, frame_index)
+        f_str = "{}_{:19d}.png".format(folder, int(frame_index))
 
         depth_path = os.path.join(
             self.data_path,

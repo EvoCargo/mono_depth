@@ -35,7 +35,7 @@ class MonoDataset(data.Dataset):
 
     def __init__(
         self,
-        name,
+        # name,
         data_path,
         filenames,
         height,
@@ -47,7 +47,7 @@ class MonoDataset(data.Dataset):
     ):
         super(MonoDataset, self).__init__()
 
-        self.name = name
+        # self.name = name
         self.data_path = data_path
         self.filenames = filenames
         self.height = height

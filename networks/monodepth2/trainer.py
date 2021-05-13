@@ -160,7 +160,7 @@ class Trainer:
         # print('Frame_ids: ', self.opt.frame_ids)
 
         train_dataset = self.dataset(
-            self.opt.dataset,
+            # self.opt.dataset,
             self.opt.data_path,
             train_filenames,
             self.opt.height,
@@ -171,15 +171,15 @@ class Trainer:
             img_ext=img_ext,
         )
         self.train_loader = DataLoader(
-            train_dataset,
-            self.opt.batch_size,
-            True,
+            dataset=train_dataset,
+            batch_size=self.opt.batch_size,
+            shuffle=True,
             num_workers=self.opt.num_workers,
             pin_memory=True,
             drop_last=True,
         )
         val_dataset = self.dataset(
-            self.opt.dataset,
+            # self.opt.dataset,
             self.opt.data_path,
             val_filenames,
             self.opt.height,
@@ -190,9 +190,9 @@ class Trainer:
             img_ext=img_ext,
         )
         self.val_loader = DataLoader(
-            val_dataset,
-            self.opt.batch_size,
-            True,
+            dataset=val_dataset,
+            batch_size=self.opt.batch_size,
+            shuffle=True,
             num_workers=self.opt.num_workers,
             pin_memory=True,
             drop_last=True,

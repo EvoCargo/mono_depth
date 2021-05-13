@@ -64,6 +64,9 @@ def evaluate(opt):
         sum((opt.eval_mono, opt.eval_stereo)) == 1
     ), "Please choose mono or stereo evaluation by setting either --eval_mono or --eval_stereo"
 
+    gt_depths = []
+    pred_disps = []
+
     if opt.ext_disp_to_eval is None:
 
         opt.load_weights_folder = os.path.expanduser(opt.load_weights_folder)
@@ -80,7 +83,18 @@ def evaluate(opt):
 
         encoder_dict = torch.load(encoder_path)
 
-        dataset = datasets.KITTIRAWDataset(
+        eigen_to_benchmark_ids = np.load(
+            os.path.join(splits_dir, "benchmark", "eigen_to_benchmark_ids.npy")
+        )
+
+        datasets_dict = {
+            "eigen_benchmark": datasets.KITTIRAWDataset,
+            'benchmark': datasets.KITTIDepthDataset,
+            'evo': datasets.EvoDataset,
+        }
+        dataset_type = datasets_dict[opt.eval_split]
+
+        dataset = dataset_type(
             opt.data_path,
             filenames,
             encoder_dict['height'],
@@ -88,7 +102,9 @@ def evaluate(opt):
             [0],
             4,
             is_train=False,
+            img_ext='.png',
         )
+
         dataloader = DataLoader(
             dataset,
             16,
@@ -112,13 +128,13 @@ def evaluate(opt):
         depth_decoder.cuda()
         depth_decoder.eval()
 
-        pred_disps = []
-
         print(
             "-> Computing predictions with size {}x{}".format(
                 encoder_dict['width'], encoder_dict['height']
             )
         )
+
+        # print(dataloader[0])
 
         with torch.no_grad():
             for data in dataloader:
@@ -144,8 +160,10 @@ def evaluate(opt):
                     )
 
                 pred_disps.append(pred_disp)
+                gt_depths.append(data['depth_gt'])
 
         pred_disps = np.concatenate(pred_disps)
+        gt_depths = np.concatenate(gt_depths)
 
     else:
         # Load predictions from file
@@ -163,34 +181,37 @@ def evaluate(opt):
         output_path = os.path.join(
             opt.load_weights_folder, "disps_{}_split.npy".format(opt.eval_split)
         )
+        output_path_gt = os.path.join(splits_dir, opt.eval_split, "gt_depths.npy")
         print("-> Saving predicted disparities to ", output_path)
         np.save(output_path, pred_disps)
+        np.save(output_path_gt, gt_depths)
 
-    if opt.no_eval:
-        print("-> Evaluation disabled. Done.")
-        quit()
+    # if opt.no_eval:
+    #     print("-> Evaluation disabled. Done.")
+    #     quit()
 
-    elif opt.eval_split == 'benchmark':
-        save_dir = os.path.join(opt.load_weights_folder, "benchmark_predictions")
-        print("-> Saving out benchmark predictions to {}".format(save_dir))
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
+    # elif opt.eval_split == 'benchmark':
+    #     save_dir = os.path.join(opt.load_weights_folder, "benchmark_predictions")
+    #     print("-> Saving out benchmark predictions to {}".format(save_dir))
+    #     if not os.path.exists(save_dir):
+    #         os.makedirs(save_dir)
 
-        for idx in range(len(pred_disps)):
-            disp_resized = cv2.resize(pred_disps[idx], (1216, 352))
-            depth = STEREO_SCALE_FACTOR / disp_resized
-            depth = np.clip(depth, 0, 80)
-            depth = np.uint16(depth * 256)
-            save_path = os.path.join(save_dir, "{:010d}.png".format(idx))
-            cv2.imwrite(save_path, depth)
+    #     for idx in range(len(pred_disps)):
+    #         disp_resized = cv2.resize(pred_disps[idx], (1216, 352))
+    #         depth = STEREO_SCALE_FACTOR / disp_resized
+    #         depth = np.clip(depth, 0, 80)
+    #         depth = np.uint16(depth * 256)
+    #         save_path = os.path.join(save_dir, "{:010d}.png".format(idx))
+    #         cv2.imwrite(save_path, depth)
 
-        print(
-            "-> No ground truth is available for the KITTI benchmark, so not evaluating. Done."
-        )
-        quit()
+    #     print(
+    #         "-> No ground truth is available for the KITTI benchmark, so not evaluating. Done."
+    #     )
+    #     quit()
 
-    gt_path = os.path.join(splits_dir, opt.eval_split, "gt_depths.npz")
-    gt_depths = np.load(gt_path, fix_imports=True, encoding='latin1')["data"]
+    if opt.eval_from_file:
+        gt_path = os.path.join(splits_dir, opt.eval_split, "gt_depths.npy")
+        gt_depths = np.load(gt_path, fix_imports=True, encoding='latin1')
 
     print("-> Evaluating")
 
@@ -207,9 +228,12 @@ def evaluate(opt):
     errors = []
     ratios = []
 
+    print(len(pred_disps))
+    print(len(gt_depths))
+
     for i in range(pred_disps.shape[0]):
 
-        gt_depth = gt_depths[i]
+        gt_depth = gt_depths[i].squeeze()
         gt_height, gt_width = gt_depth.shape[:2]
 
         pred_disp = pred_disps[i]
@@ -233,6 +257,10 @@ def evaluate(opt):
 
         else:
             mask = gt_depth > 0
+
+        # print(pred_depth.shape)
+        # print(mask.shape)
+        # print(gt_depth.shape)
 
         pred_depth = pred_depth[mask]
         gt_depth = gt_depth[mask]

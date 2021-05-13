@@ -1,6 +1,6 @@
 # Monodepth2
 
-## Training
+## How to
 
 To train network from scratch on KITTI use:
 
@@ -16,13 +16,18 @@ python train.py --model_name mono_model --data_path /media/data/datasets/bag_dep
 --split evo --batch_size ? --height ? --width ? --dataset evo
 ```
 
-TO DO resume studying in name:
+To finetune evo:
 
 ```bash
-python train.py --model_name mono_model --data_path /media/data/datasets/bag_depth --load_weights_folder ./pretrained/mono_640x192
+python train.py --model_name finetuned --data_path /media/data/datasets/bag_depth --load_weights_folder pretrained/mono_640x192 --dataset evo --split evo \
+--height 192 --width 640 --batch_size 8
 ```
 
+To evaluate evo:
 
+```bash
+python evaluate_depth.py --load_weights_folder result/... --eval_mono --eval_split evo --data_path /media/data/datasets --save_pred_disps --eval_from_file
+```
 
 ## Inference
 

@@ -211,7 +211,7 @@ class MonodepthOptions:
             "--eval_split",
             type=str,
             default="eigen",
-            choices=["eigen", "eigen_benchmark", "benchmark", "odom_9", "odom_10"],
+            choices=["eigen", "eigen_benchmark", "benchmark", "evo"],
             help="which split to run eval on",
         )
         self.parser.add_argument(
@@ -221,6 +221,11 @@ class MonodepthOptions:
         )
         self.parser.add_argument(
             "--no_eval", help="if set disables evaluation", action="store_true"
+        )
+        self.parser.add_argument(
+            "--eval_from_file",
+            help="if set eval uses gt_depth.npz file",
+            action="store_true",
         )
         self.parser.add_argument(
             "--eval_eigen_to_benchmark",

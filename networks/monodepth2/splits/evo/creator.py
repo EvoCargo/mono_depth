@@ -1,6 +1,7 @@
 import csv
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 
@@ -18,7 +19,7 @@ train_list = [
     'kalibr_04_2020-12-03_2020-12-03-13-26-10_0_ZED',
 ]
 
-test_list = [
+val_list = [
     'ckad_01_ckad_2020-10-29-17-01-56_0',
     'hospital_01_2020-07-14-16-59-35_0',
     'ipcp_03_2020-06-23_ipcp_2020-06-23-16-48-18_0',
@@ -68,7 +69,7 @@ def get_images_paths(path: Path):
 
 global_df = get_images_paths(global_path)
 train = global_df[global_df['parent_folder'].isin(train_list)]
-test = global_df[global_df['parent_folder'].isin(test_list)]
+val = global_df[global_df['parent_folder'].isin(val_list)]
 
 
 train[['image_mod', 'ind']].to_csv(
@@ -79,7 +80,7 @@ train[['image_mod', 'ind']].to_csv(
     quoting=csv.QUOTE_NONE,
     escapechar=' ',
 )
-test[['image_mod', 'ind']].to_csv(
+val[['image_mod', 'ind']].to_csv(
     'val_files.txt',
     header=False,
     index=False,
@@ -88,6 +89,16 @@ test[['image_mod', 'ind']].to_csv(
     escapechar=' ',
 )
 
+test = val.iloc[np.random.choice(np.arange(len(val)), size=120, replace=False)]
+
+test[['image_mod', 'ind']].to_csv(
+    'test_files.txt',
+    header=False,
+    index=False,
+    sep=' ',
+    quoting=csv.QUOTE_NONE,
+    escapechar=' ',
+)
 # with open('train_files.txt', 'w') as f:
 #     for it in train:
 #         f.write(path.parents[1].as_posix() + ' ' + path.stem.split('_')[-1] + ' \n')
