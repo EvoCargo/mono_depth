@@ -7,34 +7,45 @@ import random
 # import cv2
 import numpy as np
 from dp.datasets.base_dataset import BaseDataset
-from dp.datasets.utils import KittiDepthLoader, PILLoader, nomalize
+from dp.datasets.utils import DepthLoader, PILLoader, nomalize
 from PIL import Image
 
 
-class Kitti(BaseDataset):
+class evo(BaseDataset):
     def __init__(
-        self, config, is_train=True, image_loader=PILLoader, depth_loader=KittiDepthLoader
+        self,
+        config,
+        is_train=True,
+        image_loader=PILLoader,
+        depth_loader=DepthLoader,
     ):
         super().__init__(config, is_train, image_loader, depth_loader)
-        file_list = "/home/penitto/mono_depth/networks/dorn/dp/datasets/lists/kitti_{}.list".format(
-            self.split
+        file_list = (
+            "/home/penitto/mono_depth/networks/dorn/dp/datasets/lists/evo_{}.list".format(
+                self.split
+            )
         )
         with open(file_list, "r") as f:
             self.filenames = f.readlines()
 
     def _parse_path(self, index):
-        image_path, depth_path = self.filenames[index].split()
+
+        filename = self.filenames[index].split()
+
         image_path = os.path.join(
-            image_path.split('/')[2][:10], *image_path.split('/')[2:]
+            self.root,
+            filename[0],
+            'front_rgb_left',
+            '{}_{:19d}.jpg'.format(filename[0], filename[1]),
         )
 
         depth_path = os.path.join(
-            depth_path.split('/')[2][:10], *depth_path.split('/')[2:]
+            self.root,
+            filename[0],
+            'front_depth_left',
+            '{}_{:19d}.png'.format(filename[0], filename[1]),
         )
-        # print(image_path)
 
-        image_path = os.path.join(self.root, image_path)
-        depth_path = os.path.join(self.root, depth_path)
         return image_path, depth_path
 
     def _tr_preprocess(self, image, depth):
@@ -46,11 +57,11 @@ class Kitti(BaseDataset):
 
         # print('Preprocess: ', W, H, dW, dH)
 
-        assert (
-            W == dW and H == dH
-        ), "image shape should be same with depth, but image shape is {}, depth shape is {}".format(
-            (H, W), (dH, dW)
-        )
+        # assert (
+        #     W == dW and H == dH
+        # ), "image shape should be same with depth, but image shape is {}, depth shape is {}".format(
+        #     (H, W), (dH, dW)
+        # )
 
         top_margin = int(H - 352)
         left_margin = int((W - 1216) / 2)
@@ -81,7 +92,7 @@ class Kitti(BaseDataset):
         image = nomalize(image, type=self.config['norm_type'])
         image = image.transpose(2, 0, 1)
 
-        # print('After preprocess: ', image.shape, depth.shape)
+        print('After preprocess: ', image.shape, depth.shape)
 
         return image, depth, None
 

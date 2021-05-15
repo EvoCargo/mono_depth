@@ -3,15 +3,10 @@
 import logging
 import os
 import time
-from collections import OrderedDict
 
 import torch
+from torch.utils.tensorboard import SummaryWriter
 
-
-if torch.__version__ >= "1.2.0":
-    from torch.utils.tensorboard import SummaryWriter
-else:
-    from tensorboardX import SummaryWriter
 
 logging.basicConfig(
     format='[%(asctime)s %(levelname)s] %(message)s',
@@ -25,7 +20,7 @@ def ensure_dir(path):
         os.makedirs(path)
 
 
-def load_model(model, model_file, distributed=False, device=torch.device('cpu')):  # noqa
+def load_model(model, model_file, device=torch.device('cpu')):  # noqa
     t_start = time.time()
     if isinstance(model_file, str):
         state_dict = torch.load(model_file, map_location=device)
@@ -34,13 +29,6 @@ def load_model(model, model_file, distributed=False, device=torch.device('cpu'))
     else:
         state_dict = model_file
     t_ioend = time.time()
-
-    if distributed:
-        new_state_dict = OrderedDict()
-        for k, v in state_dict.items():
-            name = 'module.' + k
-            new_state_dict[name] = v
-        state_dict = new_state_dict
 
     model.load_state_dict(state_dict, strict=False)
     ckpt_keys = set(state_dict.keys())

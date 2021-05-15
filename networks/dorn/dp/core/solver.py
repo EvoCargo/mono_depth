@@ -2,14 +2,16 @@
 # -*- coding: utf-8 -*-
 import inspect
 import logging
-import os
+
+# import os
 import random
 import time
 
 import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
-import torch.distributed as dist
+
+# import torch.distributed as dist
 from dp.core.lr_policys import _get_lr_policy
 from dp.core.optimizers import _get_optimizer
 from dp.models import _get_model
@@ -40,9 +42,9 @@ class Solver(object):
         """
         self.version = __version__
         # logging.info("PyTorch Version {}, Solver Version {}".format(torch.__version__, self.version))
-        self.distributed = False
-        self.world_size = 1
-        self.local_rank = 0
+        # self.distributed = False
+        # self.world_size = 1
+        # self.local_rank = 0
         self.epoch = 0
         self.iteration = 0
         self.config = None
@@ -50,21 +52,21 @@ class Solver(object):
         self.step_decay = 1
         self.filtered_keys = None
 
-        if 'WORLD_SIZE' in os.environ:
-            self.world_size = int(os.environ['WORLD_SIZE'])
-            self.distributed = self.world_size > 1 or torch.cuda.device_count() > 1
+        # if 'WORLD_SIZE' in os.environ:
+        #     self.world_size = int(os.environ['WORLD_SIZE'])
+        #     self.distributed = self.world_size > 1 or torch.cuda.device_count() > 1
 
-        if self.distributed:
-            dist.init_process_group(backend="nccl", init_method='env://')
-            self.local_rank = dist.get_rank()
-            torch.cuda.set_device(self.local_rank)
-            logging.info(
-                '[distributed mode] world size: {}, local rank: {}.'.format(
-                    self.world_size, self.local_rank
-                )
-            )
-        else:
-            logging.info('[Single GPU mode]')
+        # if self.distributed:
+        #     dist.init_process_group(backend="nccl", init_method='env://')
+        #     self.local_rank = dist.get_rank()
+        #     torch.cuda.set_device(self.local_rank)
+        #     logging.info(
+        #         '[distributed mode] world size: {}, local rank: {}.'.format(
+        #             self.world_size, self.local_rank
+        #         )
+        #     )
+        # else:
+        logging.info('[Single GPU mode]')
 
     def _build_environ(self):
         if self.config['environ']['deterministic']:
@@ -126,9 +128,9 @@ class Solver(object):
                     config['model']['pretrained_model']
                 )
             )
-            load_model(self.model, config['model']['pretrained_model'], distributed=False)
+            load_model(self.model, config['model']['pretrained_model'])
 
-        self.model.cuda(self.local_rank)
+        self.model.cuda(0)
 
         # if self.distributed:
         #     self.model = convert_syncbn_model(self.model)
@@ -181,8 +183,8 @@ class Solver(object):
             self.config['solver']['lr_policy'], optimizer=self.optimizer
         )
 
-        load_model(self.model, continue_state_object['model'], distributed=False)
-        self.model.cuda(self.local_rank)
+        load_model(self.model, continue_state_object['model'])
+        self.model.cuda(0)
 
         # if self.distributed:
         #     self.model = convert_syncbn_model(self.model)
@@ -277,41 +279,41 @@ class Solver(object):
         torch.cuda.empty_cache()
 
     def save_checkpoint(self, path):
-        if self.local_rank == 0:
-            # logging.info("Saving checkpoint to file {}".format(path))
-            t_start = time.time()
+        # if self.local_rank == 0:
+        # logging.info("Saving checkpoint to file {}".format(path))
+        t_start = time.time()
 
-            state_dict = {}
+        state_dict = {}
 
-            from collections import OrderedDict
+        from collections import OrderedDict
 
-            new_state_dict = OrderedDict()
-            for k, v in self.model.state_dict().items():
-                key = k
-                if k.split('.')[0] == 'module':
-                    key = k[7:]
-                new_state_dict[key] = v
+        new_state_dict = OrderedDict()
+        for k, v in self.model.state_dict().items():
+            key = k
+            if k.split('.')[0] == 'module':
+                key = k[7:]
+            new_state_dict[key] = v
 
-            # if self.config['apex']['amp_used']:
-            #     state_dict['amp'] = amp.state_dict()
-            state_dict['config'] = self.config
-            state_dict['model'] = new_state_dict
-            state_dict['optimizer'] = self.optimizer.state_dict()
-            state_dict['lr_policy'] = self.lr_policy.state_dict()
-            state_dict['epoch'] = self.epoch
-            state_dict['iteration'] = self.iteration
+        # if self.config['apex']['amp_used']:
+        #     state_dict['amp'] = amp.state_dict()
+        state_dict['config'] = self.config
+        state_dict['model'] = new_state_dict
+        state_dict['optimizer'] = self.optimizer.state_dict()
+        state_dict['lr_policy'] = self.lr_policy.state_dict()
+        state_dict['epoch'] = self.epoch
+        state_dict['iteration'] = self.iteration
 
-            t_iobegin = time.time()
-            torch.save(state_dict, path)
-            del state_dict
-            del new_state_dict
-            t_end = time.time()
-            logging.info(
-                "Save checkpoint to file {}, "
-                "Time usage:\n\tprepare snapshot: {}, IO: {}".format(
-                    path, t_iobegin - t_start, t_end - t_iobegin
-                )
+        t_iobegin = time.time()
+        torch.save(state_dict, path)
+        del state_dict
+        del new_state_dict
+        t_end = time.time()
+        logging.info(
+            "Save checkpoint to file {}, "
+            "Time usage:\n\tprepare snapshot: {}, IO: {}".format(
+                path, t_iobegin - t_start, t_end - t_iobegin
             )
+        )
 
     def get_learning_rates(self):
         lrs = []

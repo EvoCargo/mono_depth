@@ -3,6 +3,7 @@ from __future__ import absolute_import, division, print_function
 import os
 
 import cv2
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from layers import disp_to_depth
@@ -94,6 +95,9 @@ def evaluate(opt):
         }
         dataset_type = datasets_dict[opt.eval_split]
 
+        # 640 192
+        # print('Encoder_dict: ', encoder_dict['height'],encoder_dict['width'])
+
         dataset = dataset_type(
             opt.data_path,
             filenames,
@@ -165,6 +169,9 @@ def evaluate(opt):
         pred_disps = np.concatenate(pred_disps)
         gt_depths = np.concatenate(gt_depths)
 
+        # 108 1 720 1280
+        # print("GT depth: ", gt_depths.shape)
+
     else:
         # Load predictions from file
         print("-> Loading predictions from {}".format(opt.ext_disp_to_eval))
@@ -185,6 +192,35 @@ def evaluate(opt):
         print("-> Saving predicted disparities to ", output_path)
         np.save(output_path, pred_disps)
         np.save(output_path_gt, gt_depths)
+
+        save_dir = os.path.join(
+            opt.load_weights_folder, "eval_predictions_{}".format(opt.eval_split)
+        )
+        print("-> Saving out benchmark predictions to {}".format(save_dir))
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+
+        # 108 192 640
+        # print('Predicted disparities: ', pred_disps.shape)
+
+        for idx in range(len(pred_disps)):
+            disp_resized = cv2.resize(
+                pred_disps[idx], (gt_depths.shape[3], gt_depths.shape[2])
+            )
+            depth = STEREO_SCALE_FACTOR / disp_resized
+            depth = np.clip(depth, 0, 80)
+            depth = np.uint16(depth * 256)
+            save_path = os.path.join(save_dir, "{:010d}.png".format(idx))
+
+            cmap = plt.cm.magma_r
+            norm = plt.Normalize(vmin=depth.min(), vmax=depth.max())
+            cmap_depth = cmap(norm(depth))
+            plt.imsave(save_path, cmap_depth)
+            # d_min = np.min(depth[:, :, 0])
+            # d_max = np.max(depth)
+            # depth_relative = (depth - d_min) / (d_max - d_min)
+            # cmap_depth = cmap(depth_relative)
+            # cv2.imwrite(save_path, cmap_depth)
 
     # if opt.no_eval:
     #     print("-> Evaluation disabled. Done.")
@@ -240,23 +276,23 @@ def evaluate(opt):
         pred_disp = cv2.resize(pred_disp, (gt_width, gt_height))
         pred_depth = 1 / pred_disp
 
-        if opt.eval_split == "eigen":
-            mask = np.logical_and(gt_depth > MIN_DEPTH, gt_depth < MAX_DEPTH)
+        # if opt.eval_split == "eigen":
+        #     mask = np.logical_and(gt_depth > MIN_DEPTH, gt_depth < MAX_DEPTH)
 
-            crop = np.array(
-                [
-                    0.40810811 * gt_height,
-                    0.99189189 * gt_height,
-                    0.03594771 * gt_width,
-                    0.96405229 * gt_width,
-                ]
-            ).astype(np.int32)
-            crop_mask = np.zeros(mask.shape)
-            crop_mask[crop[0] : crop[1], crop[2] : crop[3]] = 1
-            mask = np.logical_and(mask, crop_mask)
+        #     crop = np.array(
+        #         [
+        #             0.40810811 * gt_height,
+        #             0.99189189 * gt_height,
+        #             0.03594771 * gt_width,
+        #             0.96405229 * gt_width,
+        #         ]
+        #     ).astype(np.int32)
+        #     crop_mask = np.zeros(mask.shape)
+        #     crop_mask[crop[0] : crop[1], crop[2] : crop[3]] = 1
+        #     mask = np.logical_and(mask, crop_mask)
 
-        else:
-            mask = gt_depth > 0
+        # else:
+        mask = gt_depth > 0
 
         # print(pred_depth.shape)
         # print(mask.shape)

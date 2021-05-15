@@ -3,8 +3,9 @@ import random
 
 import numpy as np
 import torch
-import torch.utils.data.distributed
-from distributed_sampler_no_evenly_divisible import DistributedSamplerNoEvenlyDivisible
+
+# import torch.utils.data.distributed
+# from distributed_sampler_no_evenly_divisible import DistributedSamplerNoEvenlyDivisible
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
@@ -28,12 +29,12 @@ class BtsDataLoader(object):
             self.training_samples = DataLoadPreprocess(
                 args, mode, transform=preprocessing_transforms(mode)
             )
-            if args.distributed:
-                self.train_sampler = torch.utils.data.distributed.DistributedSampler(
-                    self.training_samples
-                )
-            else:
-                self.train_sampler = None
+            # if args.distributed:
+            #     self.train_sampler = torch.utils.data.distributed.DistributedSampler(
+            #         self.training_samples
+            #     )
+            # else:
+            self.train_sampler = None
 
             self.data = DataLoader(
                 self.training_samples,
@@ -48,13 +49,13 @@ class BtsDataLoader(object):
             self.testing_samples = DataLoadPreprocess(
                 args, mode, transform=preprocessing_transforms(mode)
             )
-            if args.distributed:
-                # self.eval_sampler = torch.utils.data.distributed.DistributedSampler(self.testing_samples, shuffle=False)
-                self.eval_sampler = DistributedSamplerNoEvenlyDivisible(
-                    self.testing_samples, shuffle=False
-                )
-            else:
-                self.eval_sampler = None
+            # if args.distributed:
+            #     # self.eval_sampler = torch.utils.data.distributed.DistributedSampler(self.testing_samples, shuffle=False)
+            #     self.eval_sampler = DistributedSamplerNoEvenlyDivisible(
+            #         self.testing_samples, shuffle=False
+            #     )
+            # else:
+            self.eval_sampler = None
 
             self.data = DataLoader(
                 self.testing_samples,

@@ -92,7 +92,7 @@ class MonodepthOptions:
         # OPTIMIZATION options
         self.parser.add_argument("--batch_size", type=int, help="batch size", default=12)
         self.parser.add_argument(
-            "--learning_rate", type=float, help="learning rate", default=1e-4
+            "--learning_rate", type=float, help="learning rate", default=1e-5
         )
         self.parser.add_argument(
             "--num_epochs", type=int, help="number of epochs", default=20
@@ -175,7 +175,7 @@ class MonodepthOptions:
             "--log_frequency",
             type=int,
             help="number of batches between each tensorboard log",
-            default=250,
+            default=200,
         )
         self.parser.add_argument(
             "--save_frequency",

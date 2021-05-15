@@ -74,10 +74,10 @@ net2model = {
     'monodepth2': {
         'mono_640x192': '1gVv4kb1_9H_boQAVTd3BzFmWxzbivS6P',
         # 'stereo_640x192': '1-aWu7lKQRNnygr3vAta8-vZx_ahYExlI',
-        # 'mono+stereo_640x192': '1DziaSK4oT01D2ug038JvfkJIUIOLcbt8',
+        'mono+stereo_640x192': '1DziaSK4oT01D2ug038JvfkJIUIOLcbt8',
         'mono_1024x320': '1_p7T4BKKSIbJ_92cV_9LzbXdgWCut1Ay',
         # 'stereo_1024x320': '1z4q4xo1sI2Qyukxbwv8E_hYeWvarNfQ8',
-        # 'mono+stereo_1024x320': '1KmtNclGufmFq-XoKqL3dy2Uppwcfkj4e',
+        'mono+stereo_1024x320': '1KmtNclGufmFq-XoKqL3dy2Uppwcfkj4e',
         'mono_no_pt_640x192': '1ubu-AAoxr3wVmKS77wEGrB56Anb8mmxO',
         # 'stereo_no_pt_640x192': '1tDpF5qVgWFdOkbeWRDTNCZx3wCCPEec_',
         # 'mono+stereo_no_pt_640x192': '1v9wBGVKvm75LSmrys3vmmiSeHmU1xC4o',

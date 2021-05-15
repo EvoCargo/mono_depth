@@ -12,7 +12,6 @@ import matplotlib.cm
 import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
-import torch.distributed as dist
 
 # import torch.multiprocessing as mp
 import torch.nn as nn
@@ -48,7 +47,7 @@ parser.add_argument(
 )
 # Dataset
 parser.add_argument(
-    '--dataset', type=str, help='dataset to train on, kitti or nyu', default='kitti'
+    '--dataset', type=str, help='dataset to train on, kitti or evo', default='kitti'
 )
 parser.add_argument('--data_path', type=str, help='path to the data', required=True)
 parser.add_argument(
@@ -447,9 +446,9 @@ def online_eval(model, dataloader_eval, gpu, ngpus):
     # print(eval_measures)
     # print(eval_measures.device, '\n')
 
-    if args.multiprocessing_distributed:
-        group = dist.new_group([i for i in range(ngpus)])
-        dist.all_reduce(tensor=eval_measures, op=dist.ReduceOp.SUM, group=group)
+    # if args.multiprocessing_distributed:
+    #     group = dist.new_group([i for i in range(ngpus)])
+    #     dist.all_reduce(tensor=eval_measures, op=dist.ReduceOp.SUM, group=group)
 
     if not args.multiprocessing_distributed or gpu == 0:
         eval_measures_cpu = eval_measures.cpu()

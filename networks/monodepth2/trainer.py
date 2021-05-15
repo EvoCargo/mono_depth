@@ -596,9 +596,14 @@ class Trainer:
         This isn't particularly accurate as it averages over the entire batch,
         so is only used to give an indication of validation performance
         """
+        if self.opt.split == 'evo':
+            shape = [720, 1280]
+        else:
+            shape = [375, 1242]
+
         depth_pred = outputs[("depth", 0, 0)]
         depth_pred = torch.clamp(
-            F.interpolate(depth_pred, [375, 1242], mode="bilinear", align_corners=False),
+            F.interpolate(depth_pred, shape, mode="bilinear", align_corners=False),
             1e-3,
             80,
         )
@@ -608,9 +613,9 @@ class Trainer:
         mask = depth_gt > 0
 
         # garg/eigen crop
-        crop_mask = torch.zeros_like(mask)
-        crop_mask[:, :, 153:371, 44:1197] = 1
-        mask = mask * crop_mask
+        # crop_mask = torch.zeros_like(mask)
+        # crop_mask[:, :, 153:371, 44:1197] = 1
+        # mask = mask * crop_mask
 
         depth_gt = depth_gt[mask]
         depth_pred = depth_pred[mask]

@@ -144,11 +144,6 @@ class EvoDataset(KITTIDataset):
     def __init__(self, *args, **kwargs):
         super(EvoDataset, self).__init__(*args, **kwargs)
 
-        # self.K = np.array(
-        #     [[0.58, 0, 0.5, 0], [0, 1.92, 0.5, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
-        #     dtype=np.float32,
-        # )
-
         def mask_first_last(x):
             result = np.ones_like(x)
             result[0] = 0
@@ -156,7 +151,8 @@ class EvoDataset(KITTIDataset):
             return result
 
         self.filenames = pd.DataFrame.from_records(
-            [i.split() for i in self.filenames], columns=['folder', 'file', 'ind']
+            [i.split() for i in self.filenames],
+            columns=['folder', 'file', 'ind', 'x_focal', 'y_focal', 'x_pp', 'y_pp'],
         )
 
         self.filenames.to_csv('filenames.csv', index=False)
@@ -169,6 +165,9 @@ class EvoDataset(KITTIDataset):
         self.mod_filenames = self.filenames.loc[mask]
         self.mod_filenames.reset_index(drop=True, inplace=True)
 
+        # if not self.is_train:
+        self.full_res_shape = (1280, 720)
+
     def check_depth(self):
         return True
 
@@ -177,6 +176,14 @@ class EvoDataset(KITTIDataset):
         image_path = os.path.join(self.data_path, folder, "front_rgb_left", f_str)
 
         return image_path
+
+    def get_color(self, folder, frame_index, side, do_flip):
+        color = self.loader(self.get_image_path(folder, frame_index, side))
+
+        if do_flip:
+            color = color.transpose(pil.FLIP_LEFT_RIGHT)
+
+        return color, color.size
 
     def __getitem__(self, index):
         # print(index)
@@ -189,28 +196,36 @@ class EvoDataset(KITTIDataset):
         frame_index = self.mod_filenames.iloc[index]['file']
         ind = int(self.mod_filenames.iloc[index]['ind'])
         side = None
+        x_focal = float(self.mod_filenames.iloc[index]['x_focal'])
+        y_focal = float(self.mod_filenames.iloc[index]['y_focal'])
+        x_pp = float(self.mod_filenames.iloc[index]['x_pp'])
+        y_pp = float(self.mod_filenames.iloc[index]['y_pp'])
 
         for i in self.frame_idxs:
-            if (
-                len(
-                    self.filenames[
-                        (self.filenames['folder'] == folder)
-                        & (self.filenames['ind'] == str(ind + i))
-                    ]
-                )
-                == 0
-            ):
-                print(folder, ind, i, frame_index)
 
             an_file = self.filenames[
                 (self.filenames['folder'] == folder)
                 & (self.filenames['ind'] == str(ind + i))
             ]['file'].iloc[0]
-            inputs[("color", i, -1)] = self.get_color(folder, int(an_file), side, do_flip)
+            inputs[("color", i, -1)], (real_width, real_height) = self.get_color(
+                folder, int(an_file), side, do_flip
+            )
+
+            # print('real_width: ', real_width, ' real_height: ', real_height)
 
         # adjusting intrinsics to match each scale in the pyramid
         for scale in range(self.num_scales):
-            K = self.K.copy()
+            # K = self.K.copy()
+
+            K = np.array(
+                [
+                    [x_focal / real_width, 0, x_pp / real_width, 0],
+                    [0, y_focal / real_height, y_pp / real_height, 0],
+                    [0, 0, 1, 0],
+                    [0, 0, 0, 1],
+                ],
+                dtype=np.float32,
+            )
 
             K[0, :] *= self.width // (2 ** scale)
             K[1, :] *= self.height // (2 ** scale)
@@ -233,18 +248,18 @@ class EvoDataset(KITTIDataset):
             del inputs[("color", i, -1)]
             del inputs[("color_aug", i, -1)]
 
-        if self.load_depth:
-            depth_gt = self.get_depth(folder, frame_index, side, do_flip)
-            inputs["depth_gt"] = np.expand_dims(depth_gt, 0)
-            inputs["depth_gt"] = torch.from_numpy(inputs["depth_gt"].astype(np.float32))
+        # if self.load_depth:
+        depth_gt = self.get_depth(folder, frame_index, side, do_flip)
+        # print('inside ', depth_gt.shape)
+        inputs["depth_gt"] = np.expand_dims(depth_gt, 0)
+        inputs["depth_gt"] = torch.from_numpy(inputs["depth_gt"].astype(np.float32))
 
-        if "s" in self.frame_idxs:
-            stereo_T = np.eye(4, dtype=np.float32)
-            baseline_sign = -1 if do_flip else 1
-            side_sign = -1 if side == "l" else 1
-            stereo_T[0, 3] = side_sign * baseline_sign * 0.1
-
-            inputs["stereo_T"] = torch.from_numpy(stereo_T)
+        # if "s" in self.frame_idxs:
+        #     stereo_T = np.eye(4, dtype=np.float32)
+        #     baseline_sign = -1 if do_flip else 1
+        #     side_sign = -1 if side == "l" else 1
+        #     stereo_T[0, 3] = side_sign * baseline_sign * 0.1
+        #     inputs["stereo_T"] = torch.from_numpy(stereo_T)
 
         return inputs
 

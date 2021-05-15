@@ -8,7 +8,9 @@ from dp.datasets import _get_dataset
 from dp.utils.pyt_ops import interpolate
 from torch._six import container_abcs, int_classes, string_classes
 from torch.utils.data import DataLoader
-from torch.utils.data.distributed import DistributedSampler
+
+
+# from torch.utils.data.distributed import DistributedSampler
 
 
 np_str_obj_array_pattern = re.compile(r'[SaUO]')
@@ -76,18 +78,18 @@ def collate_fn(batch):
     raise TypeError(default_collate_err_msg_format.format(elem_type))
 
 
-def build_loader(config, is_train=True, world_size=1, distributed=False):
+def build_loader(config, is_train=True):
     dataset = _get_dataset(config['data']['name'])(
         config=config["data"], is_train=is_train
     )
 
     sampler = None
-    batch_size = config['solver']['batch_size'] if is_train else world_size
+    batch_size = config['solver']['batch_size'] if is_train else 1
     niters_per_epoch = int(np.ceil(dataset.get_length() // batch_size))
 
-    if distributed:
-        sampler = DistributedSampler(dataset)
-        batch_size = batch_size // world_size
+    # if distributed:
+    #     sampler = DistributedSampler(dataset)
+    #     batch_size = batch_size // world_size
 
     if is_train:
         loader = DataLoader(

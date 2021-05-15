@@ -10,7 +10,7 @@ def PILLoader(file):
     return Image.open(file).convert('RGB')
 
 
-def KittiDepthLoader(file):
+def DepthLoader(file):
     # loads depth map D from png file
     assert os.path.exists(file), "file not found: {}".format(file)
     depth_png = np.array(Image.open(file), dtype=int)

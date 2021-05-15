@@ -102,52 +102,52 @@ def test():
             missing_ids.add(i)
             continue
 
-        if args.dataset == 'nyu':
-            pred_depth = pred_depth.astype(np.float32) / 1000.0
-        else:
-            pred_depth = pred_depth.astype(np.float32) / 256.0
+        # if args.dataset == 'nyu':
+        #     pred_depth = pred_depth.astype(np.float32) / 1000.0
+        # else:
+        pred_depth = pred_depth.astype(np.float32) / 256.0
 
         pred_depths.append(pred_depth)
 
     print('Raw png files reading done')
     print('Evaluating {} files'.format(len(pred_depths)))
 
-    if args.dataset == 'kitti':
-        for t_id in range(num_test_samples):
-            file_dir = pred_filenames[t_id].split('.')[0]
-            filename = file_dir.split('_')[-1]
-            directory = file_dir.replace('_' + filename, '')
-            gt_depth_path = os.path.join(
-                args.gt_path,
-                directory,
-                'proj_depth/groundtruth/image_02',
-                filename + '.png',
-            )
-            depth = cv2.imread(gt_depth_path, -1)
-            if depth is None:
-                print('Missing: %s ' % gt_depth_path)
-                missing_ids.add(t_id)
-                continue
+    # if args.dataset == 'kitti':
+    for t_id in range(num_test_samples):
+        file_dir = pred_filenames[t_id].split('.')[0]
+        filename = file_dir.split('_')[-1]
+        directory = file_dir.replace('_' + filename, '')
+        gt_depth_path = os.path.join(
+            args.gt_path,
+            directory,
+            'proj_depth/groundtruth/image_02',
+            filename + '.png',
+        )
+        depth = cv2.imread(gt_depth_path, -1)
+        if depth is None:
+            print('Missing: %s ' % gt_depth_path)
+            missing_ids.add(t_id)
+            continue
 
-            depth = depth.astype(np.float32) / 256.0
-            gt_depths.append(depth)
+        depth = depth.astype(np.float32) / 256.0
+        gt_depths.append(depth)
 
-    elif args.dataset == 'nyu':
-        for t_id in range(num_test_samples):
-            file_dir = pred_filenames[t_id].split('.')[0]
-            filename = file_dir.split('_')[-1]
-            directory = file_dir.replace('_rgb_' + file_dir.split('_')[-1], '')
-            gt_depth_path = os.path.join(
-                args.gt_path, directory, 'sync_depth_' + filename + '.png'
-            )
-            depth = cv2.imread(gt_depth_path, -1)
-            if depth is None:
-                print('Missing: %s ' % gt_depth_path)
-                missing_ids.add(t_id)
-                continue
+    # elif args.dataset == 'nyu':
+    #     for t_id in range(num_test_samples):
+    #         file_dir = pred_filenames[t_id].split('.')[0]
+    #         filename = file_dir.split('_')[-1]
+    #         directory = file_dir.replace('_rgb_' + file_dir.split('_')[-1], '')
+    #         gt_depth_path = os.path.join(
+    #             args.gt_path, directory, 'sync_depth_' + filename + '.png'
+    #         )
+    #         depth = cv2.imread(gt_depth_path, -1)
+    #         if depth is None:
+    #             print('Missing: %s ' % gt_depth_path)
+    #             missing_ids.add(t_id)
+    #             continue
 
-            depth = depth.astype(np.float32) / 1000.0
-            gt_depths.append(depth)
+    #         depth = depth.astype(np.float32) / 1000.0
+    #         gt_depths.append(depth)
 
     print('GT files reading done')
     print('{} GT files missing'.format(len(missing_ids)))
@@ -208,26 +208,26 @@ def eval(pred_depths):
             ] = pred_depth
             pred_depth = pred_depth_uncropped
 
-        if args.garg_crop or args.eigen_crop:
-            gt_height, gt_width = gt_depth.shape
-            eval_mask = np.zeros(valid_mask.shape)
+            # if args.garg_crop or args.eigen_crop:
+            #     gt_height, gt_width = gt_depth.shape
+            #     eval_mask = np.zeros(valid_mask.shape)
 
-            if args.garg_crop:
-                eval_mask[
-                    int(0.40810811 * gt_height) : int(0.99189189 * gt_height),
-                    int(0.03594771 * gt_width) : int(0.96405229 * gt_width),
-                ] = 1
+            #     if args.garg_crop:
+            #         eval_mask[
+            #             int(0.40810811 * gt_height) : int(0.99189189 * gt_height),
+            #             int(0.03594771 * gt_width) : int(0.96405229 * gt_width),
+            #         ] = 1
 
-            elif args.eigen_crop:
-                if args.dataset == 'kitti':
-                    eval_mask[
-                        int(0.3324324 * gt_height) : int(0.91351351 * gt_height),
-                        int(0.0359477 * gt_width) : int(0.96405229 * gt_width),
-                    ] = 1
-                else:
-                    eval_mask[45:471, 41:601] = 1
+            #     elif args.eigen_crop:
+            #         if args.dataset == 'kitti':
+            #             eval_mask[
+            #                 int(0.3324324 * gt_height) : int(0.91351351 * gt_height),
+            #                 int(0.0359477 * gt_width) : int(0.96405229 * gt_width),
+            #             ] = 1
+            #         else:
+            #             eval_mask[45:471, 41:601] = 1
 
-            valid_mask = np.logical_and(valid_mask, eval_mask)
+            #     valid_mask = np.logical_and(valid_mask, eval_mask)
 
         (
             silog[i],

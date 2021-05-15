@@ -173,7 +173,10 @@ class ResNetBackbone(nn.Module):
         self.backbone = ResNet(Bottleneck, [3, 4, 23, 3])
 
         if pretrained:
-            # saved_state_dict = torch.load('./network/pretrained_models/resnet101-imagenet.pth')
+            # saved_state_dict = torch.load(
+            #     '/home/penitto/mono_depth/networks/dorn/pretrained/resnet/resnet101_imagenet.pth',
+            #     map_location='cuda:0'
+            # )
             saved_state_dict = torch.load(
                 '/home/penitto/mono_depth/networks/dorn/pretrained/resnet/resnet101_v1c.pth',
                 map_location="cuda:0",

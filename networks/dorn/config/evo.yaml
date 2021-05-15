@@ -3,8 +3,7 @@ environ:
   deterministic: False
 model:
   name: "dorn"
-  # pretrained_model не про resnet. Он зашит дальше
-  pretrained_model:
+  pretrained_model: "/home/penitto/mono_depth/networks/dorn/pretrained/resnet/resnet101_v1c.pth"
   params:
     ord_num: 90
     gamma: -0.97
@@ -14,11 +13,11 @@ model:
     pyramid: [8, 12, 16]
     batch_norm: False
     discretization: "SID"
-    pretrained: False
+    pretrained: True
 data:
-  name: "kitti"
-  split: ["trainval", "selected_val"]
-  path: '/media/data/datasets/penitto/kitti'
+  name: "Evo"
+  split: ['train', 'val']
+  path: '/media/data/datasets/bag_depth'
   tr_crop_size: [352, 470]
   te_crop_size: [352, 470]
   norm_type: "imagenet-norm"
