@@ -7,13 +7,13 @@ import random
 # import cv2
 import numpy as np
 from dp.datasets.base_dataset import BaseDataset
-from dp.datasets.utils import DepthLoader, PILLoader, nomalize
+from dp.datasets.utils import KittiDepthLoader, PILLoader, normalize
 from PIL import Image
 
 
 class kitti(BaseDataset):
     def __init__(
-        self, config, is_train=True, image_loader=PILLoader, depth_loader=DepthLoader
+        self, config, is_train=True, image_loader=PILLoader, depth_loader=KittiDepthLoader
     ):
         super().__init__(config, is_train, image_loader, depth_loader)
         file_list = "/home/penitto/mono_depth/networks/dorn/dp/datasets/lists/kitti_{}.list".format(
@@ -70,15 +70,15 @@ class kitti(BaseDataset):
 
         # random crop size
         x = random.randint(0, image.size[0] - crop_w)
-        y = 0
-        dx, dy = math.floor(x / scale), 0
+        y = random.randint(0, image.size[1] - crop_h)
+        dx, dy = math.floor(x / scale), math.floor(y / scale)
 
         image = image.crop((x, y, x + crop_w, y + crop_h))
         depth = depth[dy : dy + crop_h, dx : dx + crop_w]
 
         # normalize
         image = np.asarray(image).astype(np.float32) / 255.0
-        image = nomalize(image, type=self.config['norm_type'])
+        image = normalize(image, type=self.config['norm_type'])
         image = image.transpose(2, 0, 1)
 
         # print('After preprocess: ', image.shape, depth.shape)
@@ -123,7 +123,7 @@ class kitti(BaseDataset):
         # normalize
         image_n = np.array(image_n).astype(np.float32)
         image = np.asarray(image).astype(np.float32) / 255.0
-        image = nomalize(image, type=self.config['norm_type'])
+        image = normalize(image, type=self.config['norm_type'])
         image = image.transpose(2, 0, 1)
 
         output_dict = {"image_n": image_n}

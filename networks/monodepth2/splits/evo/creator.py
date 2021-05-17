@@ -1,31 +1,35 @@
 import csv
+
+# import os
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 
+np.random.seed(17)
+
 global_path = Path('/media/data/datasets/bag_depth')
 train_list = [
-    'ckad_01_ckad_2020-10-29-16-53-38_0',
+    'kalibr_002_kalibr-2_n1-002_2021-03-02-12-35-04Z_.evo1a_record_default',
+    'kalibr_002_2021-03-10_gnss_tests_kalibr-2_n1-002_2021-03-10-10-59-42Z_.evo1a_record_default',
+    'kalibr_002_kalibr-2_n1-002_2021-03-02-12-48-36Z_.evo1a_record_default',
+    'kalibr_04_2021-01-18_snow_2021-01-18-15-29-39_0',
     'hospital_01_2020-07-14-14-03-23_0',
     'ipcp_03_2020-06-23_ipcp_ipcp_n1-03_2020-06-23-16-54-40Z_converted.evo1a_old_default',
     'ipcp_03_2020-08-19_ipcp_ipcp_n1-03_2020-08-18-10-14-48Z_converted.evo1a_old_default',
-    'kalibr_002_2021-03-10_gnss_tests_kalibr-2_n1-002_2021-03-10-10-59-42Z_.evo1a_record_default',
-    'kalibr_002_kalibr-2_n1-002_2021-03-02-12-35-04Z_.evo1a_record_default',
-    'kalibr_002_kalibr-2_n1-002_2021-03-02-12-48-36Z_.evo1a_record_default',
-    'kalibr_03_2020-05-22_kalibr_2020-05-22-18-40-28_full_route_high_speed',
-    'kalibr_03_2020-06-01_kalibr_2020-06-01-16-38-16_0',
-    'kalibr_04_2020-12-03_2020-12-03-13-26-10_0_ZED',
+    'ckad_01_ckad_2020-10-29-16-53-38_0',
 ]
 
 val_list = [
-    'ckad_01_ckad_2020-10-29-17-01-56_0',
-    'hospital_01_2020-07-14-16-59-35_0',
-    'ipcp_03_2020-06-23_ipcp_2020-06-23-16-48-18_0',
-    'ipcp_03_2020-08-19_ipcp_2020-08-19-20-23-09_0',
-    'kalibr_04_2021-01-18_snow_2021-01-18-15-29-39_0',
     'kalibr_04_2021-01-18_snow_2021-01-18-15-37-39_0',
+    'kalibr_04_2020-12-03_2020-12-03-13-26-10_0_ZED',
+    'kalibr_03_2020-06-01_kalibr_2020-06-01-16-38-16_0',
+    'kalibr_03_2020-05-22_kalibr_2020-05-22-18-40-28_full_route_high_speed',
+    'hospital_01_2020-07-14-16-59-35_0',
+    'ipcp_03_2020-08-19_ipcp_2020-08-19-20-23-09_0',
+    'ipcp_03_2020-06-23_ipcp_2020-06-23-16-48-18_0',
+    'ckad_01_ckad_2020-10-29-17-01-56_0',
 ]
 
 # Intrinsics matrices: (x_focal, y_focal, x_pp, y_pp)
@@ -158,49 +162,51 @@ def get_images_paths(path: Path):
     assert isinstance(path, Path)
 
     folders_paths = [folder for folder in path.iterdir() if folder.is_dir()]
-    xlsx_paths = [
-        [file for file in folder.iterdir() if file.is_file() and file.suffix == '.xlsx']
-        for folder in folders_paths
-    ]
-    flat_xlsx_paths = sorted([item for sublist in xlsx_paths for item in sublist])
 
-    res = pd.DataFrame({'image': [], 'target': [], 'ind': []})
-    for xlsx in flat_xlsx_paths:
-        df = pd.read_excel(xlsx.as_posix())
-        df = df.dropna()
-        df['image'] = xlsx.parent / df['front_rgb_left']
-        df['image'] = df['image'].apply(lambda x: '/'.join(x.as_posix().split('/')[-3:]))
+    res = pd.DataFrame({'folder': [], 'filenum': [], 'ind': []})
+    for folder in folders_paths:
 
-        df['target'] = df['front_dp_classic']
-        df['target'] = df['target'].apply(lambda x: '/'.join(x.split('/')[1:]))
+        images = [
+            image for image in (folder / 'front_rgb_left').iterdir() if image.is_file()
+        ]
+        depths = [
+            depth for depth in (folder / 'front_depth_left').iterdir() if depth.is_file()
+        ]
 
-        df = df.sort_values('image').reset_index(drop=True)
+        images_st = np.array([image.stem for image in images])
+        depths_st = np.array([depth.stem for depth in depths])
+
+        _, images_mask, _ = np.intersect1d(images_st, depths_st, return_indices=True)
+
+        images_masked = np.array(images_st)[images_mask]
+
+        df = pd.DataFrame({'folder': [], 'filenum': [], 'ind': []})
+        df['folder'] = [i[:-20] for i in images_masked]
+        df['filenum'] = [i[-19:] for i in images_masked]
+
+        df = df.sort_values('filenum').reset_index(drop=True)
         df['ind'] = df.index
 
-        res = res.append(df[['image', 'target', 'ind']])
+        res = res.append(df[['folder', 'filenum', 'ind']])
     res.reset_index(inplace=True, drop=True)
 
-    res['image'] = res['image'].apply(lambda x: Path(x))
-    res['target'] = res['target'].apply(lambda x: Path(x))
-    res['ind'] = res['ind'].astype(int)
-    res['image_mod'] = res['image'].apply(
-        lambda x: x.parents[1].as_posix() + ' ' + x.stem.split('_')[-1]
-    )
-    res['parent_folder'] = res['image'].apply(lambda x: x.parents[1].as_posix())
-
-    res['x_focal'] = res['parent_folder'].apply(lambda x: K_maxtrces[x][0])
-    res['y_focal'] = res['parent_folder'].apply(lambda x: K_maxtrces[x][1])
-    res['x_pp'] = res['parent_folder'].apply(lambda x: K_maxtrces[x][2])
-    res['y_pp'] = res['parent_folder'].apply(lambda x: K_maxtrces[x][3])
+    res['x_focal'] = res['folder'].apply(lambda x: K_maxtrces[x][0])
+    res['y_focal'] = res['folder'].apply(lambda x: K_maxtrces[x][1])
+    res['x_pp'] = res['folder'].apply(lambda x: K_maxtrces[x][2])
+    res['y_pp'] = res['folder'].apply(lambda x: K_maxtrces[x][3])
 
     return res
 
 
 global_df = get_images_paths(global_path)
-train = global_df[global_df['parent_folder'].isin(train_list)]
-val = global_df[global_df['parent_folder'].isin(val_list)]
+train = global_df[global_df['folder'].isin(train_list)]
+val = global_df[global_df['folder'].isin(val_list)]
+test = val.iloc[np.random.choice(np.arange(len(val)), size=len(val) // 10, replace=False)]
+train_val = global_df[
+    global_df['folder'].isin(train_list) | global_df['folder'].isin(val_list)
+]
 
-to_write = ['image_mod', 'ind', 'x_focal', 'y_focal', 'x_pp', 'y_pp']
+to_write = ['folder', 'filenum', 'ind', 'x_focal', 'y_focal', 'x_pp', 'y_pp']
 
 train[to_write].to_csv(
     'train_files.txt',
@@ -219,10 +225,17 @@ val[to_write].to_csv(
     escapechar=' ',
 )
 
-test = val.iloc[np.random.choice(np.arange(len(val)), size=120, replace=False)]
-
 test[to_write].to_csv(
     'test_files.txt',
+    header=False,
+    index=False,
+    sep=' ',
+    quoting=csv.QUOTE_NONE,
+    escapechar=' ',
+)
+
+train_val[to_write].to_csv(
+    'trainval_files.txt',
     header=False,
     index=False,
     sep=' ',

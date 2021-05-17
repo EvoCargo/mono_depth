@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-# @Time    : 2019/12/25 下午10:58
-# @Author  : Wang Xin
-# @Email   : wangxin_buaa@163.com
-# @File    : optimizers.py
-
 
 from torch.optim import SGD, Adam
 from torch.optim.adadelta import Adadelta

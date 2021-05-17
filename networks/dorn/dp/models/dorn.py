@@ -47,6 +47,10 @@ class DepthPredModel(nn.Module):
     def optimizer_params(self):
         group_params = [
             {
+                "params": filter(lambda p: p.requires_grad, self.backbone.parameters()),
+                "lr": 1.0,
+            },
+            {
                 "params": filter(
                     lambda p: p.requires_grad, self.SceneUnderstandingModule.parameters()
                 ),

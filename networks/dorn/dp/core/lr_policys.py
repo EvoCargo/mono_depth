@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-# @Time    : 2019/12/25 下午10:56
-# @Author  : Wang Xin
-# @Email   : wangxin_buaa@163.com
-# @File    : lr_policys.py
 
 
-from .lr_schedulers import ConstantLR, MultiStepLR, PolyLR, StepLR, WarmUpLR
+from .lr_schedulers import (
+    ConstantLR,
+    CosineAnnealingLR,
+    MultiStepLR,
+    PolyLR,
+    StepLR,
+    WarmUpLR,
+)
 
 
 __schedulers__ = {
@@ -13,6 +16,7 @@ __schedulers__ = {
     'multi_step': MultiStepLR,
     'constant': ConstantLR,
     'poly': PolyLR,
+    'cosine': CosineAnnealingLR,
 }
 
 
@@ -42,6 +46,13 @@ def _get_lr_policy(config, optimizer):
             optimizer,
             gamma=config["params"]["gamma"],
             n_iteration=config["params"]["n_iteration"],
+        )
+
+    if config['name'] == 'cosine':
+        scheduler = __schedulers__[config['name']](
+            optimizer,
+            T_max=config['params']['T_max'],
+            eta_min=config['params']['eta_min'],
         )
 
     if config.get('warm_up') is not None:

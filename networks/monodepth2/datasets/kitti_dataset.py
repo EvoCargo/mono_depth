@@ -267,7 +267,7 @@ class EvoDataset(KITTIDataset):
         return len(self.mod_filenames)
 
     def get_depth(self, folder, frame_index, side, do_flip):
-        f_str = "{}_{:19d}.png".format(folder, int(frame_index))
+        f_str = "{}_{}.png".format(folder, frame_index)
 
         depth_path = os.path.join(
             self.data_path,
@@ -278,7 +278,7 @@ class EvoDataset(KITTIDataset):
 
         depth_gt = pil.open(depth_path)
         depth_gt = depth_gt.resize(self.full_res_shape, pil.NEAREST)
-        depth_gt = np.array(depth_gt).astype(np.float32) / 256
+        depth_gt = np.array(depth_gt).astype(np.float32)
 
         if do_flip:
             depth_gt = np.fliplr(depth_gt)

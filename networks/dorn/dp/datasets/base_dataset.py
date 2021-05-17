@@ -30,6 +30,9 @@ class BaseDataset(data.Dataset):
         item_name = image_path.split("/")[-1].split(".")[0]
 
         image, depth = self._fetch_data(image_path, depth_path)
+
+        # print(image_path)
+
         image, depth, extra_dict = self.preprocess(image, depth)
         image = torch.from_numpy(np.ascontiguousarray(image)).float()
 

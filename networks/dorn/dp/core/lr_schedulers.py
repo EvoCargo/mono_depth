@@ -50,11 +50,7 @@ class _LRScheduler(object):
         self.step(last_epoch)
 
     def state_dict(self):
-        """Returns the state of the scheduler as a :class:`dict`.
 
-        It contains an entry for every variable in self.__dict__ which
-        is not the optimizer.
-        """
         return {key: value for key, value in self.__dict__.items() if key != 'optimizer'}
 
     def load_state_dict(self, state_dict):
@@ -103,27 +99,6 @@ class _LRScheduler(object):
 
 
 class LambdaLR(_LRScheduler):
-    """Sets the learning rate of each parameter group to the initial lr
-    times a given function. When last_epoch=-1, sets initial lr as lr.
-
-    Args:
-        optimizer (Optimizer): Wrapped optimizer.
-        lr_lambda (function or list): A function which computes a multiplicative
-            factor given an integer parameter epoch, or a list of such
-            functions, one for each group in optimizer.param_groups.
-        last_epoch (int): The index of last epoch. Default: -1.
-
-    Example:
-        >>> # Assuming optimizer has two groups.
-        >>> lambda1 = lambda epoch: epoch // 30
-        >>> lambda2 = lambda epoch: 0.95 ** epoch
-        >>> scheduler = LambdaLR(optimizer, lr_lambda=[lambda1, lambda2])
-        >>> for epoch in range(100):
-        >>>     train(...)
-        >>>     validate(...)
-        >>>     scheduler.step()
-    """
-
     def __init__(self, optimizer, lr_lambda, last_epoch=-1):
         self.optimizer = optimizer
         if not isinstance(lr_lambda, list) and not isinstance(lr_lambda, tuple):
@@ -182,30 +157,6 @@ class LambdaLR(_LRScheduler):
 
 
 class StepLR(_LRScheduler):
-    """Sets the learning rate of each parameter group to the initial lr
-    decayed by gamma every step_size epochs. When last_epoch=-1, sets
-    initial lr as lr.
-
-    Args:
-        optimizer (Optimizer): Wrapped optimizer.
-        step_size (int): Period of learning rate decay.
-        gamma (float): Multiplicative factor of learning rate decay.
-            Default: 0.1.
-        last_epoch (int): The index of last epoch. Default: -1.
-
-    Example:
-        >>> # Assuming optimizer uses lr = 0.05 for all groups
-        >>> # lr = 0.05     if epoch < 30
-        >>> # lr = 0.005    if 30 <= epoch < 60
-        >>> # lr = 0.0005   if 60 <= epoch < 90
-        >>> # ...
-        >>> scheduler = StepLR(optimizer, step_size=30, gamma=0.1)
-        >>> for epoch in range(100):
-        >>>     train(...)
-        >>>     validate(...)
-        >>>     scheduler.step()
-    """
-
     def __init__(self, optimizer, step_size, gamma=0.1, last_epoch=-1):
         self.step_size = step_size
         self.gamma = gamma
@@ -219,29 +170,6 @@ class StepLR(_LRScheduler):
 
 
 class MultiStepLR(_LRScheduler):
-    """Set the learning rate of each parameter group to the initial lr decayed
-    by gamma once the number of epoch reaches one of the milestones. When
-    last_epoch=-1, sets initial lr as lr.
-
-    Args:
-        optimizer (Optimizer): Wrapped optimizer.
-        milestones (list): List of epoch indices. Must be increasing.
-        gamma (float): Multiplicative factor of learning rate decay.
-            Default: 0.1.
-        last_epoch (int): The index of last epoch. Default: -1.
-
-    Example:
-        >>> # Assuming optimizer uses lr = 0.05 for all groups
-        >>> # lr = 0.05     if epoch < 30
-        >>> # lr = 0.005    if 30 <= epoch < 80
-        >>> # lr = 0.0005   if epoch >= 80
-        >>> scheduler = MultiStepLR(optimizer, milestones=[30,80], gamma=0.1)
-        >>> for epoch in range(100):
-        >>>     train(...)
-        >>>     validate(...)
-        >>>     scheduler.step()
-    """
-
     def __init__(self, optimizer, milestones, gamma=0.1, last_epoch=-1):
         if not list(milestones) == sorted(milestones):
             raise ValueError(
@@ -260,15 +188,6 @@ class MultiStepLR(_LRScheduler):
 
 
 class ExponentialLR(_LRScheduler):
-    """Set the learning rate of each parameter group to the initial lr decayed
-    by gamma every epoch. When last_epoch=-1, sets initial lr as lr.
-
-    Args:
-        optimizer (Optimizer): Wrapped optimizer.
-        gamma (float): Multiplicative factor of learning rate decay.
-        last_epoch (int): The index of last epoch. Default: -1.
-    """
-
     def __init__(self, optimizer, gamma, last_epoch=-1):
         self.gamma = gamma
         super(ExponentialLR, self).__init__(optimizer, last_epoch)
@@ -278,30 +197,6 @@ class ExponentialLR(_LRScheduler):
 
 
 class CosineAnnealingLR(_LRScheduler):
-    r"""Set the learning rate of each parameter group using a cosine annealing
-    schedule, where :math:`\eta_{max}` is set to the initial lr and
-    :math:`T_{cur}` is the number of epochs since the last restart in SGDR:
-
-    .. math::
-        \eta_t = \eta_{min} + \frac{1}{2}(\eta_{max} - \eta_{min})(1 +
-        \cos(\frac{T_{cur}}{T_{max}}\pi))
-
-    When last_epoch=-1, sets initial lr as lr.
-
-    It has been proposed in
-    `SGDR: Stochastic Gradient Descent with Warm Restarts`_. Note that this only
-    implements the cosine annealing part of SGDR, and not the restarts.
-
-    Args:
-        optimizer (Optimizer): Wrapped optimizer.
-        T_max (int): Maximum number of iterations.
-        eta_min (float): Minimum learning rate. Default: 0.
-        last_epoch (int): The index of last epoch. Default: -1.
-
-    .. _SGDR\: Stochastic Gradient Descent with Warm Restarts:
-        https://arxiv.org/abs/1608.03983
-    """
-
     def __init__(self, optimizer, T_max, eta_min=0, last_epoch=-1):
         self.T_max = T_max
         self.eta_min = eta_min
@@ -318,54 +213,6 @@ class CosineAnnealingLR(_LRScheduler):
 
 
 class ReduceLROnPlateau(object):
-    """Reduce learning rate when a metric has stopped improving.
-    Models often benefit from reducing the learning rate by a factor
-    of 2-10 once learning stagnates. This scheduler reads a metrics
-    quantity and if no improvement is seen for a 'patience' number
-    of epochs, the learning rate is reduced.
-
-    Args:
-        optimizer (Optimizer): Wrapped optimizer.
-        mode (str): One of `min`, `max`. In `min` mode, lr will
-            be reduced when the quantity monitored has stopped
-            decreasing; in `max` mode it will be reduced when the
-            quantity monitored has stopped increasing. Default: 'min'.
-        factor (float): Factor by which the learning rate will be
-            reduced. new_lr = lr * factor. Default: 0.1.
-        patience (int): Number of epochs with no improvement after
-            which learning rate will be reduced. For example, if
-            `patience = 2`, then we will ignore the first 2 epochs
-            with no improvement, and will only decrease the LR after the
-            3rd epoch if the loss still hasn't improved then.
-            Default: 10.
-        verbose (bool): If ``True``, prints a message to stdout for
-            each update. Default: ``False``.
-        threshold (float): Threshold for measuring the new optimum,
-            to only focus on significant changes. Default: 1e-4.
-        threshold_mode (str): One of `rel`, `abs`. In `rel` mode,
-            dynamic_threshold = best * ( 1 + threshold ) in 'max'
-            mode or best * ( 1 - threshold ) in `min` mode.
-            In `abs` mode, dynamic_threshold = best + threshold in
-            `max` mode or best - threshold in `min` mode. Default: 'rel'.
-        cooldown (int): Number of epochs to wait before resuming
-            normal operation after lr has been reduced. Default: 0.
-        min_lr (float or list): A scalar or a list of scalars. A
-            lower bound on the learning rate of all param groups
-            or each group respectively. Default: 0.
-        eps (float): Minimal decay applied to lr. If the difference
-            between new and old lr is smaller than eps, the update is
-            ignored. Default: 1e-8.
-
-    Example:
-        >>> optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9)
-        >>> scheduler = ReduceLROnPlateau(optimizer, 'min')
-        >>> for epoch in range(10):
-        >>>     train(...)
-        >>>     val_loss = validate(...)
-        >>>     # Note that step should be called after validate()
-        >>>     scheduler.step(val_loss)
-    """
-
     def __init__(
         self,
         optimizer,
@@ -504,99 +351,6 @@ class ReduceLROnPlateau(object):
 
 
 class CyclicLR(_LRScheduler):
-    """Sets the learning rate of each parameter group according to
-    cyclical learning rate policy (CLR). The policy cycles the learning
-    rate between two boundaries with a constant frequency, as detailed in
-    the paper `Cyclical Learning Rates for Training Neural Networks`_.
-    The distance between the two boundaries can be scaled on a per-iteration
-    or per-cycle basis.
-
-    Cyclical learning rate policy changes the learning rate after every batch.
-    `step` should be called after a batch has been used for training.
-
-    This class has three built-in policies, as put forth in the paper:
-    "triangular":
-        A basic triangular cycle w/ no amplitude scaling.
-    "triangular2":
-        A basic triangular cycle that scales initial amplitude by half each cycle.
-    "exp_range":
-        A cycle that scales initial amplitude by gamma**(cycle iterations) at each
-        cycle iteration.
-
-    This implementation was adapted from the github repo: `bckenstler/CLR`_
-
-    Args:
-        optimizer (Optimizer): Wrapped optimizer.
-        base_lr (float or list): Initial learning rate which is the
-            lower boundary in the cycle for each parameter group.
-        max_lr (float or list): Upper learning rate boundaries in the cycle
-            for each parameter group. Functionally,
-            it defines the cycle amplitude (max_lr - base_lr).
-            The lr at any cycle is the sum of base_lr
-            and some scaling of the amplitude; therefore
-            max_lr may not actually be reached depending on
-            scaling function.
-        step_size_up (int): Number of training iterations in the
-            increasing half of a cycle. Default: 2000
-        step_size_down (int): Number of training iterations in the
-            decreasing half of a cycle. If step_size_down is None,
-            it is set to step_size_up. Default: None
-        mode (str): One of {triangular, triangular2, exp_range}.
-            Values correspond to policies detailed above.
-            If scale_fn is not None, this argument is ignored.
-            Default: 'triangular'
-        gamma (float): Constant in 'exp_range' scaling function:
-            gamma**(cycle iterations)
-            Default: 1.0
-        scale_fn (function): Custom scaling policy defined by a single
-            argument lambda function, where
-            0 <= scale_fn(x) <= 1 for all x >= 0.
-            If specified, then 'mode' is ignored.
-            Default: None
-        scale_mode (str): {'cycle', 'iterations'}.
-            Defines whether scale_fn is evaluated on
-            cycle number or cycle iterations (training
-            iterations since start of cycle).
-            Default: 'cycle'
-        cycle_momentum (bool): If ``True``, momentum is cycled inversely
-            to learning rate between 'base_momentum' and 'max_momentum'.
-            Default: True
-        base_momentum (float or list): Lower momentum boundaries in the cycle
-            for each parameter group. Note that momentum is cycled inversely
-            to learning rate; at the peak of a cycle, momentum is
-            'base_momentum' and learning rate is 'max_lr'.
-            Default: 0.8
-        max_momentum (float or list): Upper momentum boundaries in the cycle
-            for each parameter group. Functionally,
-            it defines the cycle amplitude (max_momentum - base_momentum).
-            The momentum at any cycle is the difference of max_momentum
-            and some scaling of the amplitude; therefore
-            base_momentum may not actually be reached depending on
-            scaling function. Note that momentum is cycled inversely
-            to learning rate; at the start of a cycle, momentum is 'max_momentum'
-            and learning rate is 'base_lr'
-            Default: 0.9
-        last_epoch (int): The index of the last batch. This parameter is used when
-            resuming a training job. Since `step()` should be invoked after each
-            batch instead of after each epoch, this number represents the total
-            number of *batches* computed, not the total number of epochs computed.
-            When last_epoch=-1, the schedule is started from the beginning.
-            Default: -1
-
-    Example:
-        >>> optimizer = torch.optim.SGD(model.parameters(), lr=0.1, momentum=0.9)
-        >>> scheduler = torch.optim.lr_scheduler.CyclicLR(optimizer, base_lr=0.01, max_lr=0.1)
-        >>> data_loader = torch.utils.data.DataLoader(...)
-        >>> for epoch in range(10):
-        >>>     for batch in data_loader:
-        >>>         train_batch(...)
-        >>>         scheduler.step()
-
-
-    .. _Cyclical Learning Rates for Training Neural Networks: https://arxiv.org/abs/1506.01186
-    .. _bckenstler/CLR: https://github.com/bckenstler/CLR
-    """
-
     def __init__(
         self,
         optimizer,
@@ -735,32 +489,6 @@ class CyclicLR(_LRScheduler):
 
 
 class CosineAnnealingWarmRestarts(_LRScheduler):
-    r"""Set the learning rate of each parameter group using a cosine annealing
-    schedule, where :math:`\eta_{max}` is set to the initial lr, :math:`T_{cur}`
-    is the number of epochs since the last restart and :math:`T_{i}` is the number
-    of epochs between two warm restarts in SGDR:
-
-    .. math::
-        \eta_t = \eta_{min} + \frac{1}{2}(\eta_{max} - \eta_{min})(1 +
-        \cos(\frac{T_{cur}}{T_{i}}\pi))
-
-    When :math:`T_{cur}=T_{i}`, set :math:`\eta_t = \eta_{min}`.
-    When :math:`T_{cur}=0`(after restart), set :math:`\eta_t=\eta_{max}`.
-
-    It has been proposed in
-    `SGDR: Stochastic Gradient Descent with Warm Restarts`_.
-
-    Args:
-        optimizer (Optimizer): Wrapped optimizer.
-        T_0 (int): Number of iterations for the first restart.
-        T_mult (int, optional): A factor increases :math:`T_{i}` after a restart. Default: 1.
-        eta_min (float, optional): Minimum learning rate. Default: 0.
-        last_epoch (int, optional): The index of last epoch. Default: -1.
-
-    .. _SGDR\: Stochastic Gradient Descent with Warm Restarts:
-        https://arxiv.org/abs/1608.03983
-    """
-
     def __init__(self, optimizer, T_0, T_mult=1, eta_min=0, last_epoch=-1):
         if T_0 <= 0 or not isinstance(T_0, int):
             raise ValueError("Expected positive integer T_0, but got {}".format(T_0))
@@ -783,30 +511,6 @@ class CosineAnnealingWarmRestarts(_LRScheduler):
         ]
 
     def step(self, epoch=None):
-        """Step could be called after every batch update
-
-        Example:
-            >>> scheduler = CosineAnnealingWarmRestarts(optimizer, T_0, T_mult)
-            >>> iters = len(dataloader)
-            >>> for epoch in range(20):
-            >>>     for i, sample in enumerate(dataloader):
-            >>>         inputs, labels = sample['inputs'], sample['labels']
-            >>>         scheduler.step(epoch + i / iters)
-            >>>         optimizer.zero_grad()
-            >>>         outputs = net(inputs)
-            >>>         loss = criterion(outputs, labels)
-            >>>         loss.backward()
-            >>>         optimizer.step()
-
-        This function can be called in an interleaved way.
-
-        Example:
-            >>> scheduler = CosineAnnealingWarmRestarts(optimizer, T_0, T_mult)
-            >>> for epoch in range(20):
-            >>>     scheduler.step()
-            >>> scheduler.step(26)
-            >>> scheduler.step() # scheduler.step(27), instead of scheduler(20)
-        """
         if epoch is None:
             epoch = self.last_epoch + 1
             self.T_cur = self.T_cur + 1

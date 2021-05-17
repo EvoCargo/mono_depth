@@ -24,7 +24,7 @@ data:
   norm_type: "imagenet-norm"
 solver:
   epochs: 14
-  batch_size: 2
+  batch_size: 1
   step_decay: 1
   optimizer:
     name: 'SGD'

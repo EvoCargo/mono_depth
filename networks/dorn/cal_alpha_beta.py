@@ -4,12 +4,12 @@ import os
 import numpy as np
 
 # import torch
-from dp.datasets.utils import KittiDepthLoader
+from dp.datasets.utils import EvoDepthLoader
 from tqdm import tqdm
 
 
-root_dir = "/data/wangxin/KITTI"
-filelist = "./kitti_trainval.list"
+root_dir = "/media/data/datasets/bag_depth"
+filelist = "/home/penitto/mono_depth/networks/dorn/dp/datasets/lists/evo_trainval.list"
 with open(filelist, "r") as f:
     filenames = f.readlines()
 
@@ -17,9 +17,19 @@ alpha = 10000.0
 beta = 0.0
 
 for i in tqdm(range(len(filenames))):
-    _, path = filenames[i].split()
-    path = os.path.join(root_dir, path)
-    depth = KittiDepthLoader(path)
+    # _, path = filenames[i].split()
+    # path = os.path.join(root_dir, path)
+
+    filename = filenames[i].split()
+
+    depth_path = os.path.join(
+        root_dir,
+        filename[0],
+        'front_depth_left',
+        '{}_{}.png'.format(filename[0], filename[1]),
+    )
+
+    depth = EvoDepthLoader(depth_path)
     mask = depth > 0.0
     valid_depth = depth[mask]
     tmp_max = np.max(valid_depth)

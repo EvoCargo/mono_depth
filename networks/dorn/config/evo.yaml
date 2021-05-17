@@ -3,39 +3,40 @@ environ:
   deterministic: False
 model:
   name: "dorn"
-  pretrained_model: "/home/penitto/mono_depth/networks/dorn/pretrained/resnet/resnet101_v1c.pth"
+  pretrained_model:
   params:
     ord_num: 90
-    gamma: -0.97
-    beta: 90.0
-    input_size: [352, 470]
+    gamma: -1.0
+    beta: 117.0
+    input_size: [270, 480]
     kernel_size: 16
-    pyramid: [8, 12, 16]
-    batch_norm: False
+    pyramid: [4, 8, 16]
+    batch_norm: True
     discretization: "SID"
     pretrained: True
 data:
-  name: "Evo"
+  name: "evo"
   split: ['train', 'val']
   path: '/media/data/datasets/bag_depth'
-  tr_crop_size: [352, 470]
-  te_crop_size: [352, 470]
-  norm_type: "imagenet-norm"
+  tr_crop_size: [270, 480]
+  te_crop_size: [270, 480]
+  norm_type: "norm"
 solver:
-  epochs: 14
-  batch_size: 2
+  epochs: 30
+  batch_size: 1
   step_decay: 1
   optimizer:
-    name: 'SGD'
+    name: 'Adam'
     params:
       lr: 0.0001
-      momentum: 0.9
+      # momentum: 0.9
       weight_decay: 0.0005
+      eps: 1e-5
   lr_policy:
-    name: 'poly'
-    params:
-      gamma: 0.9
-      n_iteration: 300636
+    name: 'constant'
+    # params:
+    #   T_max: 500
+    #   eta_min: 0.00001
 # apex:
 #   amp_used: False
 #   opt_level: "O1"

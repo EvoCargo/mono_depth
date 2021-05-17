@@ -131,6 +131,9 @@ for epoch in range(solver.epoch + 1, config['solver']['epochs'] + 1):
     #     pbar = range(niter_test)
     metric.reset()
     test_iter = iter(te_loader)
+
+    cntr = 0
+
     for idx in pbar:
         t_start = time.time()
         minibatch = next(test_iter)
@@ -162,7 +165,9 @@ for epoch in range(solver.epoch + 1, config['solver']['epochs'] + 1):
         visualization for model output and feature maps.
         """
         # if is_main_process and idx % 10 == 0:
-        visualizer.visualize(minibatch, pred, epoch=epoch)
+        if cntr % 100 == 0:
+            visualizer.visualize(minibatch, pred, epoch=epoch)
+        cntr += 1
 
     # if is_main_process:
     logging.info(

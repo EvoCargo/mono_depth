@@ -1,14 +1,16 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-import math
+# import math
 import os
 import random
 
-# import cv2
+import cv2
 import numpy as np
 from dp.datasets.base_dataset import BaseDataset
-from dp.datasets.utils import DepthLoader, PILLoader, nomalize
-from PIL import Image
+from dp.datasets.utils import EvoDepthLoader, PILLoader, normalize
+
+
+# from PIL import Image
 
 
 class evo(BaseDataset):
@@ -17,7 +19,7 @@ class evo(BaseDataset):
         config,
         is_train=True,
         image_loader=PILLoader,
-        depth_loader=DepthLoader,
+        depth_loader=EvoDepthLoader,
     ):
         super().__init__(config, is_train, image_loader, depth_loader)
         file_list = (
@@ -36,14 +38,14 @@ class evo(BaseDataset):
             self.root,
             filename[0],
             'front_rgb_left',
-            '{}_{:19d}.jpg'.format(filename[0], filename[1]),
+            '{}_{}.jpg'.format(filename[0], filename[1]),
         )
 
         depth_path = os.path.join(
             self.root,
             filename[0],
             'front_depth_left',
-            '{}_{:19d}.png'.format(filename[0], filename[1]),
+            '{}_{}.png'.format(filename[0], filename[1]),
         )
 
         return image_path, depth_path
@@ -53,46 +55,29 @@ class evo(BaseDataset):
         # resize
         W, H = image.size
         dH, dW = depth.shape
-        scale = max(crop_h / H, 1.0)
+        # scale = max(crop_h / H, 1.0)      # скорее всего это 1
+        # print(scale)
 
-        # print('Preprocess: ', W, H, dW, dH)
-
-        # assert (
-        #     W == dW and H == dH
-        # ), "image shape should be same with depth, but image shape is {}, depth shape is {}".format(
-        #     (H, W), (dH, dW)
-        # )
-
-        top_margin = int(H - 352)
-        left_margin = int((W - 1216) / 2)
-        image = image.crop(
-            (left_margin, top_margin, left_margin + 1216, top_margin + 352)
-        )
-        depth = depth[
-            top_margin : top_margin + 352,
-            left_margin : left_margin + 1216,
-        ]
-
-        # scale = max(crop_h / H, 1.0)
-        # H, W = max(crop_h, H), math.ceil(scale * W)
-        # image = image.resize((W, H), Image.BILINEAR)
-        # # depth = cv2.resize(depth, (W, H), cv2.INTER_LINEAR)
-        # # print("image shape:", image.size, " depth shape:", depth.shape)
+        if dH != H:
+            depth = cv2.resize(depth, (W, H), cv2.INTER_LINEAR)
 
         # random crop size
         x = random.randint(0, image.size[0] - crop_w)
-        y = 0
-        dx, dy = math.floor(x / scale), 0
+        y = random.randint(0, image.size[1] - crop_h)
+        # dx, dy = math.floor(x / scale), math.floor(y / scale)
+
+        # print('Before preprocess: ', image.size, depth.shape)
+        # print('x {} y {} dx {} dy {}'.format(x,y,dx,dy))
 
         image = image.crop((x, y, x + crop_w, y + crop_h))
-        depth = depth[dy : dy + crop_h, dx : dx + crop_w]
+        depth = depth[y : y + crop_h, x : x + crop_w]
 
         # normalize
         image = np.asarray(image).astype(np.float32) / 255.0
-        image = nomalize(image, type=self.config['norm_type'])
+        image = normalize(image, type=self.config['norm_type'])
         image = image.transpose(2, 0, 1)
 
-        print('After preprocess: ', image.shape, depth.shape)
+        # print('After preprocess: ', image.shape, depth.shape)
 
         return image, depth, None
 
@@ -101,40 +86,31 @@ class evo(BaseDataset):
         # resize
         W, H = image.size
         dH, dW = depth.shape
+        # scale = max(crop_h / H, 1.0)
 
-        assert (
-            W == dW and H == dH
-        ), "image shape should be same with depth, but image shape is {}, depth shape is {}".format(
-            (H, W), (dH, dW)
-        )
-
-        # scale_h, scale_w = max(crop_h/H, 1.0), max(crop_w/W, 1.0)
-        # scale = max(scale_h, scale_w)
-        # # H, W = math.ceil(scale*H), math.ceil(scale*W)
-        scale = max(crop_h / H, 1.0)
-        H, W = max(crop_h, H), math.ceil(scale * W)
-        # H, W = max(int(scale*H), crop_h), max(int(scale*W), crop_w)
+        if dH != H:
+            depth = cv2.resize(depth, (W, H), cv2.INTER_LINEAR)
 
         image_n = image.copy()
-        image = image.resize((W, H), Image.BILINEAR)
-        crop_dh, crop_dw = int(crop_h / scale), int(crop_w / scale)
+        # crop_dh, crop_dw = int(crop_h / scale), int(crop_w / scale)
         # print("corp dh = {}, crop dw = {}".format(crop_dh, crop_dw))
         # depth = cv2.resize(depth, (W, H), cv2.INTER_LINEAR)
 
         # center crop
-        x = (W - crop_w) // 2
-        y = (H - crop_h) // 2
-        dx = (dW - crop_dw) // 2
-        dy = (dH - crop_dh) // 2
+        # x = (W - crop_w) // 2
+        # y = (H - crop_h) // 2
+
+        x = random.randint(0, image.size[0] - crop_w)
+        y = random.randint(0, image.size[1] - crop_h)
 
         image = image.crop((x, y, x + crop_w, y + crop_h))
-        depth = depth[dy : dy + crop_dh, dx : dx + crop_dw]
-        image_n = image_n.crop((dx, dy, dx + crop_dw, dy + crop_dh))
+        depth = depth[y : y + crop_h, x : x + crop_w]
+        image_n = image_n.crop((x, y, x + crop_w, y + crop_h))
 
         # normalize
         image_n = np.array(image_n).astype(np.float32)
         image = np.asarray(image).astype(np.float32) / 255.0
-        image = nomalize(image, type=self.config['norm_type'])
+        image = normalize(image, type=self.config['norm_type'])
         image = image.transpose(2, 0, 1)
 
         output_dict = {"image_n": image_n}

@@ -10,12 +10,15 @@ def PILLoader(file):
     return Image.open(file).convert('RGB')
 
 
-def DepthLoader(file):
+def KittiDepthLoader(file):
     # loads depth map D from png file
     assert os.path.exists(file), "file not found: {}".format(file)
     depth_png = np.array(Image.open(file), dtype=int)
     # make sure we have a proper 16bit depth map here.. not 8bit!
-    assert np.max(depth_png) > 255
+
+    assert np.max(depth_png) > 255, '{} {} {}'.format(
+        np.max(depth_png), depth_png.shape, file
+    )
 
     depth = depth_png.astype(np.float) / 256.0
     depth[depth_png == 0] = -1.0
@@ -24,7 +27,22 @@ def DepthLoader(file):
     return depth
 
 
-def nomalize(image, type="mean"):
+def EvoDepthLoader(file):
+    # loads depth map D from png file
+    assert os.path.exists(file), "file not found: {}".format(file)
+    depth_png = np.array(Image.open(file), dtype=int)
+    # make sure we have a proper 16bit depth map here.. not 8bit!
+
+    # assert np.max(depth_png) > 255, '{} {} {}'.format(np.max(depth_png), depth_png.shape, file)
+
+    depth = depth_png.astype(np.float)
+    depth[depth_png == 0] = -1.0
+
+    # print(file, depth.shape)
+    return depth
+
+
+def normalize(image, type="mean"):
     assert type in [
         "mean",
         "norm",
