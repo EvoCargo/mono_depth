@@ -4,7 +4,6 @@ import random
 import numpy as np
 import torch
 
-# import torch.utils.data.distributed
 # from distributed_sampler_no_evenly_divisible import DistributedSamplerNoEvenlyDivisible
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
@@ -29,33 +28,20 @@ class BtsDataLoader(object):
             self.training_samples = DataLoadPreprocess(
                 args, mode, transform=preprocessing_transforms(mode)
             )
-            # if args.distributed:
-            #     self.train_sampler = torch.utils.data.distributed.DistributedSampler(
-            #         self.training_samples
-            #     )
-            # else:
-            self.train_sampler = None
 
             self.data = DataLoader(
                 self.training_samples,
                 args.batch_size,
-                shuffle=(self.train_sampler is None),
+                shuffle=True,
                 num_workers=args.num_threads,
                 pin_memory=True,
-                sampler=self.train_sampler,
+                sampler=None,
             )
 
         elif mode == 'online_eval':
             self.testing_samples = DataLoadPreprocess(
                 args, mode, transform=preprocessing_transforms(mode)
             )
-            # if args.distributed:
-            #     # self.eval_sampler = torch.utils.data.distributed.DistributedSampler(self.testing_samples, shuffle=False)
-            #     self.eval_sampler = DistributedSamplerNoEvenlyDivisible(
-            #         self.testing_samples, shuffle=False
-            #     )
-            # else:
-            self.eval_sampler = None
 
             self.data = DataLoader(
                 self.testing_samples,
@@ -63,7 +49,7 @@ class BtsDataLoader(object):
                 shuffle=False,
                 num_workers=1,
                 pin_memory=True,
-                sampler=self.eval_sampler,
+                sampler=None,
             )
         elif mode == 'test':
             self.testing_samples = DataLoadPreprocess(
@@ -92,35 +78,38 @@ class DataLoadPreprocess(Dataset):
         self.to_tensor = ToTensor
         self.is_for_online_eval = is_for_online_eval
 
+        # self.full_res_shape = (1280, 720)
+
     def __getitem__(self, idx):
         sample_path = self.filenames[idx]
-        focal = float(sample_path.split()[2])
+
+        splitted = sample_path.split()
+
+        if self.args.dataset == 'kitti':
+            focal = float(splitted[2])
+        else:
+            focal = float(splitted[3])
+
+        image_path = os.path.join(
+            self.args.data_path,
+            splitted[0],
+            'front_rgb_left',
+            splitted[0] + '_' + splitted[1] + '.jpg',
+        )
+        depth_path = os.path.join(
+            self.args.data_path,
+            splitted[0],
+            'front_depth_left',
+            splitted[0] + '_' + splitted[1] + '.png',
+        )
 
         if self.mode == 'train':
-            image_path = os.path.join(self.args.data_path, sample_path.split()[0])
-            depth_path = os.path.join(
-                self.args.gt_path,
-                sample_path.split()[0].split('/')[0],
-                sample_path.split()[1],
-            )
-
             image = Image.open(image_path)
             depth_gt = Image.open(depth_path)
+            if depth_gt.size != image.size:
+                depth_gt = depth_gt.resize(image.size, Image.NEAREST)
 
-            if self.args.do_kb_crop:
-                height = image.height
-                width = image.width
-
-                top_margin = int(height - 352)
-                left_margin = int((width - 1216) / 2)
-                depth_gt = depth_gt.crop(
-                    (left_margin, top_margin, left_margin + 1216, top_margin + 352)
-                )
-                image = image.crop(
-                    (left_margin, top_margin, left_margin + 1216, top_margin + 352)
-                )
-
-            if self.args.do_random_rotate is True:
+            if self.args.do_random_rotate:
                 random_angle = (random.random() - 0.5) * 2 * self.args.degree
                 image = self.rotate_image(image, random_angle)
                 depth_gt = self.rotate_image(depth_gt, random_angle, flag=Image.NEAREST)
@@ -129,8 +118,6 @@ class DataLoadPreprocess(Dataset):
             depth_gt = np.asarray(depth_gt, dtype=np.float32)
             depth_gt = np.expand_dims(depth_gt, axis=2)
 
-            depth_gt = depth_gt / 256.0
-
             image, depth_gt = self.random_crop(
                 image, depth_gt, self.args.input_height, self.args.input_width
             )
@@ -138,58 +125,37 @@ class DataLoadPreprocess(Dataset):
             sample = {'image': image, 'depth': depth_gt, 'focal': focal}
 
         else:
-            if self.mode == 'online_eval':
-                data_path = self.args.data_path_eval
-            else:
-                data_path = self.args.data_path
-
-            image_path = os.path.join(data_path, sample_path.split()[0])
-            image = np.asarray(Image.open(image_path), dtype=np.float32) / 255.0
-
-            if self.mode == 'online_eval':
-                gt_path = self.args.gt_path_eval
-                depth_path = os.path.join(
-                    gt_path, sample_path.split()[0].split('/')[0], sample_path.split()[1]
+            image = (
+                np.asarray(
+                    Image.open(image_path).resize(
+                        (self.args.input_width, self.args.input_height), Image.NEAREST
+                    ),
+                    dtype=np.float32,
                 )
-                has_valid_depth = False
-                try:
-                    depth_gt = Image.open(depth_path)
-                    has_valid_depth = True
-                except IOError:
-                    depth_gt = False
-                    # print('Missing gt for {}'.format(image_path))
+                / 255.0
+            )
 
-                if has_valid_depth:
-                    depth_gt = np.asarray(depth_gt, dtype=np.float32)
-                    depth_gt = np.expand_dims(depth_gt, axis=2)
-                    if self.args.dataset == 'nyu':
-                        depth_gt = depth_gt / 1000.0
-                    else:
-                        depth_gt = depth_gt / 256.0
+            has_valid_depth = False
+            try:
+                depth_gt = Image.open(depth_path).resize(
+                    (self.args.input_width, self.args.input_height), Image.NEAREST
+                )
+                has_valid_depth = True
+            except IOError:
+                depth_gt = False
+                # print('Missing gt for {}'.format(image_path))
 
-            if self.args.do_kb_crop is True:
-                height = image.shape[0]
-                width = image.shape[1]
-                top_margin = int(height - 352)
-                left_margin = int((width - 1216) / 2)
-                image = image[
-                    top_margin : top_margin + 352, left_margin : left_margin + 1216, :
-                ]
-                if self.mode == 'online_eval' and has_valid_depth:
-                    depth_gt = depth_gt[
-                        top_margin : top_margin + 352, left_margin : left_margin + 1216, :
-                    ]
+            if has_valid_depth:
+                depth_gt = np.asarray(depth_gt, dtype=np.float32)
+                depth_gt = np.expand_dims(depth_gt, axis=2)
+                # print(depth_gt.shape)
 
-            if self.mode == 'online_eval':
-                sample = {
-                    'image': image,
-                    'depth': depth_gt,
-                    'focal': focal,
-                    'has_valid_depth': has_valid_depth,
-                }
-            else:
-                sample = {'image': image, 'focal': focal}
-
+            sample = {
+                'image': image,
+                'depth': depth_gt,
+                'focal': focal,
+                'has_valid_depth': has_valid_depth,
+            }
         if self.transform:
             sample = self.transform(sample)
 
@@ -229,11 +195,7 @@ class DataLoadPreprocess(Dataset):
         gamma = random.uniform(0.9, 1.1)
         image_aug = image ** gamma
 
-        # brightness augmentation
-        if self.args.dataset == 'nyu':
-            brightness = random.uniform(0.75, 1.25)
-        else:
-            brightness = random.uniform(0.9, 1.1)
+        brightness = random.uniform(0.9, 1.1)
         image_aug = image_aug * brightness
 
         # color augmentation

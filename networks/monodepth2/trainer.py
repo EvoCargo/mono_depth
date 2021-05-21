@@ -292,6 +292,8 @@ class Trainer:
 
             self.step += 1
 
+            # print(self.step)
+
     def process_batch(self, inputs):
         """Pass a minibatch through the network and generate images and losses"""
         for key, ipt in inputs.items():

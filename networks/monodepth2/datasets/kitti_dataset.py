@@ -155,7 +155,12 @@ class EvoDataset(KITTIDataset):
             columns=['folder', 'file', 'ind', 'x_focal', 'y_focal', 'x_pp', 'y_pp'],
         )
 
-        self.filenames.to_csv('filenames.csv', index=False)
+        self.filenames['ind'] = self.filenames['ind'].apply(lambda x: x[:-2])
+
+        if self.is_train:
+            self.filenames.to_csv('train_filenames.csv', index=False)
+        else:
+            self.filenames.to_csv('val_filenames.csv', index=False)
 
         mask = (
             self.filenames.groupby('folder')['folder']
@@ -210,8 +215,6 @@ class EvoDataset(KITTIDataset):
             inputs[("color", i, -1)], (real_width, real_height) = self.get_color(
                 folder, int(an_file), side, do_flip
             )
-
-            # print('real_width: ', real_width, ' real_height: ', real_height)
 
         # adjusting intrinsics to match each scale in the pyramid
         for scale in range(self.num_scales):
