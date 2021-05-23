@@ -67,14 +67,14 @@ class autoencoder(nn.Module):
 
             if self.count % interval == 0:
                 img_path = os.path.join(
-                    '/node01_data5/monodepth2-test/odo',
+                    '/media/data/datasets/penitto/networks/featdepth/test_images',
                     'auto_{:0>4d}_{}.png'.format(self.count // interval, scale),
                 )
                 plt.imsave(
                     img_path, pred[0].transpose(0, 1).transpose(1, 2).data.cpu().numpy()
                 )
                 img_path = os.path.join(
-                    '/node01_data5/monodepth2-test/odo',
+                    '/media/data/datasets/penitto/networks/featdepth/test_images',
                     'img_{:0>4d}_{}.png'.format(self.count // interval, scale),
                 )
                 plt.imsave(

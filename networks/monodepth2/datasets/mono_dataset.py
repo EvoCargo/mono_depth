@@ -1,12 +1,8 @@
 from __future__ import absolute_import, division, print_function
 
-# import copy
-# import os
 import random
 
 import numpy as np
-
-# import pandas as pd
 import torch
 import torch.utils.data as data
 from PIL import Image  # using pillow-simd for increased speed
@@ -35,7 +31,6 @@ class MonoDataset(data.Dataset):
 
     def __init__(
         self,
-        # name,
         data_path,
         filenames,
         height,
@@ -47,7 +42,6 @@ class MonoDataset(data.Dataset):
     ):
         super(MonoDataset, self).__init__()
 
-        # self.name = name
         self.data_path = data_path
         self.filenames = filenames
         self.height = height

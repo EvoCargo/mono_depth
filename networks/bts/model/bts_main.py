@@ -238,13 +238,16 @@ def main_worker(opts):
     best_eval_steps = np.zeros(9, dtype=np.int32)
 
     # Training parameters
-    optimizer = torch.optim.AdamW(
+    optimizer = torch.optim.Adam(
         [
             {
                 'params': model.encoder.parameters(),
                 'weight_decay': opts.weight_decay,
             },
-            {'params': model.decoder.parameters(), 'weight_decay': 0},
+            {
+                'params': model.decoder.parameters(),
+                'weight_decay': opts.weight_decay,
+            },
         ],
         lr=opts.learning_rate,
         eps=opts.adam_eps,
@@ -367,7 +370,6 @@ def main_worker(opts):
                 )
 
                 writer.add_scalar('silog_loss', loss, global_step)
-                writer.add_scalar('learning_rate', current_lr, global_step)
                 depth_gt = torch.where(depth_gt < 1e-3, depth_gt * 0 + 1e3, depth_gt)
                 for i in range(num_log_images):
                     writer.add_image(
@@ -500,13 +502,13 @@ def main():
 
     torch.cuda.empty_cache()
 
-    if opts.do_online_eval:
-        print("You have specified --do_online_eval.")
-        print(
-            "This will evaluate the model every eval_freq {} steps and save best models for individual eval metrics.".format(
-                opts.eval_freq
-            )
-        )
+    # if opts.do_online_eval:
+    #     print("You have specified --do_online_eval.")
+    #     print(
+    #         "This will evaluate the model every eval_freq {} steps and save best models for individual eval metrics.".format(
+    #             opts.eval_freq
+    #         )
+    #     )
 
     main_worker(opts)
 

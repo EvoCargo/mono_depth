@@ -48,7 +48,7 @@ class MonodepthOptions:
             type=str,
             help="dataset to train on",
             default="kitti",
-            choices=["kitti", "kitti_odom", "kitti_depth", "kitti_test", 'evo'],
+            choices=["kitti", "kitti_depth", "kitti_test", 'evo'],
         )
         self.parser.add_argument(
             "--png",

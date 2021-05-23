@@ -401,8 +401,8 @@ class bts(nn.Module):
         )
         iconv1 = self.conv1(concat1)
         final_depth = self.params.max_depth * self.get_depth(iconv1)
-        if self.params.dataset == 'kitti':
-            final_depth = final_depth * focal.view(-1, 1, 1, 1).float() / 715.0873
+        # if self.params.dataset == 'kitti':
+        #     final_depth = final_depth * focal.view(-1, 1, 1, 1).float() / 715.0873
 
         return depth_8x8_scaled, depth_4x4_scaled, depth_2x2_scaled, reduc1x1, final_depth
 
@@ -413,31 +413,31 @@ class encoder(nn.Module):
         self.params = params
         import torchvision.models as models
 
-        if params.encoder == 'densenet121_bts':
+        if params.encoder == 'densenet121':
             self.base_model = models.densenet121(pretrained=True).features
             self.feat_names = ['relu0', 'pool0', 'transition1', 'transition2', 'norm5']
             self.feat_out_channels = [64, 64, 128, 256, 1024]
-        elif params.encoder == 'densenet161_bts':
+        elif params.encoder == 'densenet161':
             self.base_model = models.densenet161(pretrained=True).features
             self.feat_names = ['relu0', 'pool0', 'transition1', 'transition2', 'norm5']
             self.feat_out_channels = [96, 96, 192, 384, 2208]
-        elif params.encoder == 'resnet50_bts':
+        elif params.encoder == 'resnet50':
             self.base_model = models.resnet50(pretrained=True)
             self.feat_names = ['relu', 'layer1', 'layer2', 'layer3', 'layer4']
             self.feat_out_channels = [64, 256, 512, 1024, 2048]
-        elif params.encoder == 'resnet101_bts':
+        elif params.encoder == 'resnet101':
             self.base_model = models.resnet101(pretrained=True)
             self.feat_names = ['relu', 'layer1', 'layer2', 'layer3', 'layer4']
             self.feat_out_channels = [64, 256, 512, 1024, 2048]
-        elif params.encoder == 'resnext50_bts':
+        elif params.encoder == 'resnext50':
             self.base_model = models.resnext50_32x4d(pretrained=True)
             self.feat_names = ['relu', 'layer1', 'layer2', 'layer3', 'layer4']
             self.feat_out_channels = [64, 256, 512, 1024, 2048]
-        elif params.encoder == 'resnext101_bts':
+        elif params.encoder == 'resnext101':
             self.base_model = models.resnext101_32x8d(pretrained=True)
             self.feat_names = ['relu', 'layer1', 'layer2', 'layer3', 'layer4']
             self.feat_out_channels = [64, 256, 512, 1024, 2048]
-        elif params.encoder == 'mobilenetv2_bts':
+        elif params.encoder == 'mobilenetv2':
             self.base_model = models.mobilenet_v2(pretrained=True).features
             self.feat_inds = [2, 4, 7, 11, 19]
             self.feat_out_channels = [16, 24, 32, 64, 1280]

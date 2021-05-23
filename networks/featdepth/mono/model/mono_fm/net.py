@@ -49,6 +49,13 @@ class mono_fm(nn.Module):
         self.project = Project(self.opt.imgs_per_gpu, self.opt.height, self.opt.width)
 
     def forward(self, inputs):
+        # print(
+        #     self.DepthEncoder(inputs["color_aug", 0, 0])[0].shape,
+        #     self.DepthEncoder(inputs["color_aug", 0, 0])[1].shape,
+        #     self.DepthEncoder(inputs["color_aug", 0, 0])[2].shape,
+        #     self.DepthEncoder(inputs["color_aug", 0, 0])[3].shape,
+        #     self.DepthEncoder(inputs["color_aug", 0, 0])[4].shape
+        # )
         outputs = self.DepthDecoder(self.DepthEncoder(inputs["color_aug", 0, 0]))
         if self.training:
             outputs.update(self.predict_poses(inputs))

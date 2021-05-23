@@ -55,27 +55,22 @@ class MonoDataset(data.Dataset):
         self.to_tensor = transforms.ToTensor()
 
         # Need to specify augmentations differently in pytorch 1.0 compared with 0.4
-        if int(torch.__version__.split('.')[0]) > 0:
-            self.brightness = (0.8, 1.2)
-            self.contrast = (0.8, 1.2)
-            self.saturation = (0.8, 1.2)
-            self.hue = (-0.1, 0.1)
-        else:
-            self.brightness = 0.2
-            self.contrast = 0.2
-            self.saturation = 0.2
-            self.hue = 0.1
+
+        self.brightness = (0.8, 1.2)
+        self.contrast = (0.8, 1.2)
+        self.saturation = (0.8, 1.2)
+        self.hue = (-0.1, 0.1)
 
         self.resize = transforms.Resize(
             (self.height, self.width), interpolation=self.interp
         )
 
-        self.flag = np.zeros(self.__len__(), dtype=np.int64)
+        # self.flag = np.zeros(self.__len__(), dtype=np.int64)
 
-        if not is_train and self.gt_depth_path is not None:
-            self.gt_depths = np.load(
-                gt_depth_path, allow_pickle=True, fix_imports=True, encoding='latin1'
-            )["data"]
+        # if not is_train and self.gt_depth_path is not None:
+        #     self.gt_depths = np.load(
+        #         gt_depth_path, allow_pickle=True, fix_imports=True, encoding='latin1'
+        #     )["data"]
 
     def preprocess(self, inputs, color_aug):
         """Resize colour images to the required scales and augment if required
