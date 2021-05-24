@@ -15,8 +15,8 @@ from torch.utils.data import Dataset
 from .pixel_error import AverageMeter, compute_errors, disp_to_depth
 
 
-MIN_DEPTH = 1e-3
-MAX_DEPTH = 80
+MIN_DEPTH = 2
+MAX_DEPTH = 117
 
 
 def change_input_variable(data):
@@ -62,6 +62,9 @@ class NonDistEvalHook(Hook):
                 result = runner.model(data)
 
             disp = result[("disp", 0, 0)]
+
+            # print('Disp: ', disp.shape)
+
             pred_disp, _ = disp_to_depth(disp)
             pred_disp = pred_disp.cpu()[0, 0].numpy()
 
@@ -84,6 +87,9 @@ class NonDistEvalHook(Hook):
             crop_mask[crop[0] : crop[1], crop[2] : crop[3]] = 1
             mask = np.logical_and(mask, crop_mask)
 
+            # print('Pred: ', pred_depth.shape)
+            # print('mask:', mask.shape)
+
             pred_depth = pred_depth[mask]
             gt_depth = gt_depth[mask]
 
@@ -104,9 +110,11 @@ class NonDistEvalHook(Hook):
             a1.update(a1_)
             a2.update(a2_)
             a3.update(a3_)
-            print('a1_ is ', a1_)
+            # print('a1_ is ', a1_)
 
         print('a1 is ', a1.avg)
+        print('a2 is ', a2.avg)
+        print('a3 is ', a3.avg)
 
 
 class DistEvalHook(Hook):

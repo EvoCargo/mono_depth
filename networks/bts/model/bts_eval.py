@@ -9,7 +9,6 @@ import cv2
 import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
-import torch.nn as nn
 
 # import torch.nn.utils as utils
 # import torchvision.utils as vutils
@@ -177,7 +176,7 @@ def test(params):
     dataloader = BtsDataLoader(args, 'eval')
 
     model = BtsModel(params=params)
-    model = nn.DataParallel(model)
+    # model = nn.DataParallel(model)
 
     cudnn.benchmark = True
 

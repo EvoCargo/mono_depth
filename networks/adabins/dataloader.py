@@ -3,6 +3,7 @@
 import os
 import random
 
+import cv2
 import numpy as np
 import torch
 import torch.utils.data.distributed
@@ -29,18 +30,13 @@ class DepthDataLoader(object):
             self.training_samples = DataLoadPreprocess(
                 args, mode, transform=preprocessing_transforms(mode)
             )
-            if args.distributed:
-                self.train_sampler = torch.utils.data.distributed.DistributedSampler(
-                    self.training_samples
-                )
-            else:
-                self.train_sampler = None
+            self.train_sampler = None
 
             self.data = DataLoader(
                 self.training_samples,
                 args.batch_size,
                 shuffle=(self.train_sampler is None),
-                num_workers=args.num_threads,
+                num_workers=args.workers,
                 pin_memory=True,
                 sampler=self.train_sampler,
             )
@@ -49,13 +45,7 @@ class DepthDataLoader(object):
             self.testing_samples = DataLoadPreprocess(
                 args, mode, transform=preprocessing_transforms(mode)
             )
-            if (
-                args.distributed
-            ):  # redundant. here only for readability and to be more explicit
-                # Give whole test set to all processes (and perform/report evaluation only on one) regardless
-                self.eval_sampler = None
-            else:
-                self.eval_sampler = None
+            self.eval_sampler = None
             self.data = DataLoader(
                 self.testing_samples,
                 1,
@@ -100,33 +90,28 @@ class DataLoadPreprocess(Dataset):
 
     def __getitem__(self, idx):
         sample_path = self.filenames[idx]
-        focal = float(sample_path.split()[2])
+
+        splitted = sample_path.split()
+
+        focal = float(sample_path.split()[3])
+
+        image_path = os.path.join(
+            self.args.data_path,
+            splitted[0],
+            'front_rgb_left',
+            splitted[0] + '_' + splitted[1] + '.jpg',
+        )
+        depth_path = os.path.join(
+            self.args.data_path,
+            splitted[0],
+            'front_depth_left',
+            splitted[0] + '_' + splitted[1] + '.png',
+        )
 
         if self.mode == 'train':
 
-            image_path = os.path.join(
-                self.args.data_path, remove_leading_slash(sample_path.split()[0])
-            )
-            depth_path = os.path.join(
-                self.args.gt_path,
-                sample_path.split()[0].split('/')[0],
-                sample_path.split()[1],
-            )
             image = Image.open(image_path)
             depth_gt = Image.open(depth_path)
-
-            if self.args.do_kb_crop:
-                height = image.height
-                width = image.width
-                top_margin = int(height - 352)
-                left_margin = int((width - 1216) / 2)
-                depth_gt = depth_gt.crop(
-                    (left_margin, top_margin, left_margin + 1216, top_margin + 352)
-                )
-                image = image.crop(
-                    (left_margin, top_margin, left_margin + 1216, top_margin + 352)
-                )
-                # print(image.size)
 
             if self.args.do_random_rotate:
                 random_angle = (random.random() - 0.5) * 2 * self.args.degree
@@ -137,33 +122,40 @@ class DataLoadPreprocess(Dataset):
             depth_gt = np.asarray(depth_gt, dtype=np.float32)
             depth_gt = np.expand_dims(depth_gt, axis=2)
 
-            depth_gt = depth_gt / 256.0
+            # image, depth_gt = self.random_crop(
+            #     image, depth_gt, self.args.input_height, self.args.input_width
+            # )
 
-            image, depth_gt = self.random_crop(
-                image, depth_gt, self.args.input_height, self.args.input_width
+            image = cv2.resize(
+                image, (self.args.input_width, self.args.input_height), cv2.INTER_LINEAR
             )
+            depth_gt = cv2.resize(
+                depth_gt,
+                (self.args.input_width, self.args.input_height),
+                cv2.INTER_LINEAR,
+            )
+            depth_gt = np.expand_dims(depth_gt, axis=2)
+
             image, depth_gt = self.train_preprocess(image, depth_gt)
             sample = {'image': image, 'depth': depth_gt, 'focal': focal}
 
         else:
-            if self.mode == 'online_eval':
-                data_path = self.args.data_path_eval
-            else:
-                data_path = self.args.data_path
-
-            image_path = os.path.join(
-                data_path, remove_leading_slash(sample_path.split()[0])
-            )
-            image = np.asarray(Image.open(image_path), dtype=np.float32) / 255.0
-
-            if self.mode == 'online_eval':
-                gt_path = self.args.gt_path_eval
-                depth_path = os.path.join(
-                    gt_path, remove_leading_slash(sample_path.split()[1])
+            image = (
+                np.asarray(
+                    Image.open(image_path).resize(
+                        (self.args.input_width, self.args.input_height), Image.NEAREST
+                    ),
+                    dtype=np.float32,
                 )
+                / 255.0
+            )
+
+            if self.mode == 'online_eval':
                 has_valid_depth = False
                 try:
-                    depth_gt = Image.open(depth_path)
+                    depth_gt = Image.open(depth_path).resize(
+                        (self.args.input_width, self.args.input_height), Image.NEAREST
+                    )
                     has_valid_depth = True
                 except IOError:
                     depth_gt = False
@@ -172,21 +164,6 @@ class DataLoadPreprocess(Dataset):
                 if has_valid_depth:
                     depth_gt = np.asarray(depth_gt, dtype=np.float32)
                     depth_gt = np.expand_dims(depth_gt, axis=2)
-
-                    depth_gt = depth_gt / 256.0
-
-            if self.args.do_kb_crop:
-                height = image.shape[0]
-                width = image.shape[1]
-                top_margin = int(height - 352)
-                left_margin = int((width - 1216) / 2)
-                image = image[
-                    top_margin : top_margin + 352, left_margin : left_margin + 1216, :
-                ]
-                if self.mode == 'online_eval' and has_valid_depth:
-                    depth_gt = depth_gt[
-                        top_margin : top_margin + 352, left_margin : left_margin + 1216, :
-                    ]
 
             if self.mode == 'online_eval':
                 sample = {

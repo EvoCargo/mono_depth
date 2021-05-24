@@ -330,6 +330,8 @@ def main_worker(opts):
 
             # print('Model.input: ', image.size(), depth_gt.size())
             lpg8x8, lpg4x4, lpg2x2, reduc1x1, depth_est = model(image, focal)
+            # print('Estimated stats: ', depth_est.min().data, depth_est.max().data, depth_est.std().data, depth_est.mean().data)
+            # print('True stats: ', depth_gt.min().data, depth_gt.max().data, depth_gt.std().data, depth_gt.mean().data)
 
             # print('Model output: ', depth_est.size())
 
@@ -370,16 +372,22 @@ def main_worker(opts):
                 )
 
                 writer.add_scalar('silog_loss', loss, global_step)
-                depth_gt = torch.where(depth_gt < 1e-3, depth_gt * 0 + 1e3, depth_gt)
+                # print('Depth stats before', depth_gt.max(), depth_gt.min())
+                # depth_gt = torch.where(depth_gt < 1e-3, depth_gt * 0 + 1e3, depth_gt)
+                # print(
+                #     'Depth stats normalized',
+                #     normalize_result(1 / depth_gt[i, :, :, :].data).max(),
+                #     normalize_result(1 / depth_gt[i, :, :, :].data).min()
+                # )
                 for i in range(num_log_images):
                     writer.add_image(
                         'depth_gt/image/{}'.format(i),
-                        normalize_result(1 / depth_gt[i, :, :, :].data),
+                        normalize_result(depth_gt[i, :, :, :].data),
                         global_step,
                     )
                     writer.add_image(
                         'depth_est/image/{}'.format(i),
-                        normalize_result(1 / depth_est[i, :, :, :].data),
+                        normalize_result(depth_est[i, :, :, :].data),
                         global_step,
                     )
                     writer.add_image(

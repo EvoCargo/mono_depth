@@ -1,6 +1,7 @@
 import os
 import random
 
+import cv2
 import numpy as np
 import torch
 
@@ -106,6 +107,7 @@ class DataLoadPreprocess(Dataset):
         if self.mode == 'train':
             image = Image.open(image_path)
             depth_gt = Image.open(depth_path)
+
             if depth_gt.size != image.size:
                 depth_gt = depth_gt.resize(image.size, Image.NEAREST)
 
@@ -116,11 +118,26 @@ class DataLoadPreprocess(Dataset):
 
             image = np.asarray(image, dtype=np.float32) / 255.0
             depth_gt = np.asarray(depth_gt, dtype=np.float32)
-            depth_gt = np.expand_dims(depth_gt, axis=2)
 
-            image, depth_gt = self.random_crop(
-                image, depth_gt, self.args.input_height, self.args.input_width
+            # Image.fromarray(depth_gt.astype(np.uint8)).save('/home/penitto/mono_depth/networks/bts/log/before_resize.png')
+
+            # print('Before crop shape ', depth_gt.shape)
+            # image, depth_gt = self.random_crop(
+            #     image, depth_gt, self.args.input_height, self.args.input_width
+            # )
+
+            # print('Before resize shape ', depth_gt.shape)
+            image = cv2.resize(
+                image, (self.args.input_width, self.args.input_height), cv2.INTER_LINEAR
             )
+            depth_gt = cv2.resize(
+                depth_gt,
+                (self.args.input_width, self.args.input_height),
+                cv2.INTER_LINEAR,
+            )
+            depth_gt = np.expand_dims(depth_gt, axis=2)
+            # print('After resize/crop depth shape ', depth_gt.shape)
+
             image, depth_gt = self.train_preprocess(image, depth_gt)
             sample = {'image': image, 'depth': depth_gt, 'focal': focal}
 
@@ -228,6 +245,7 @@ class ToTensor(object):
 
         depth = sample['depth']
         if self.mode == 'train':
+            # print('Depth shape: ', depth.shape)
             depth = self.to_tensor(depth)
             return {'image': image, 'depth': depth, 'focal': focal}
         else:

@@ -144,6 +144,3 @@ class PointCloudHelper:
         z = depth.reshape(length)
 
         return np.dstack((self.xx * z, self.yy * z, z)).reshape((length, 3))
-
-
-#####################################################################################################

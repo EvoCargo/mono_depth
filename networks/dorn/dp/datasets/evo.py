@@ -2,15 +2,11 @@
 # -*- coding: utf-8 -*-
 # import math
 import os
-import random
 
 import cv2
 import numpy as np
 from dp.datasets.base_dataset import BaseDataset
 from dp.datasets.utils import EvoDepthLoader, PILLoader, normalize
-
-
-# from PIL import Image
 
 
 class evo(BaseDataset):
@@ -62,15 +58,14 @@ class evo(BaseDataset):
             depth = cv2.resize(depth, (W, H), cv2.INTER_LINEAR)
 
         # random crop size
-        x = random.randint(0, image.size[0] - crop_w)
-        y = random.randint(0, image.size[1] - crop_h)
-        # dx, dy = math.floor(x / scale), math.floor(y / scale)
+        # x = random.randint(0, image.size[0] - crop_w)
+        # y = random.randint(0, image.size[1] - crop_h)
 
-        # print('Before preprocess: ', image.size, depth.shape)
-        # print('x {} y {} dx {} dy {}'.format(x,y,dx,dy))
+        # image = image.crop((x, y, x + crop_w, y + crop_h))
+        # depth = depth[y : y + crop_h, x : x + crop_w]
 
-        image = image.crop((x, y, x + crop_w, y + crop_h))
-        depth = depth[y : y + crop_h, x : x + crop_w]
+        image = image.resize((crop_w, crop_h))
+        depth = cv2.resize(depth, (crop_w, crop_h), cv2.INTER_LINEAR)
 
         # normalize
         image = np.asarray(image).astype(np.float32) / 255.0
@@ -100,12 +95,16 @@ class evo(BaseDataset):
         # x = (W - crop_w) // 2
         # y = (H - crop_h) // 2
 
-        x = random.randint(0, image.size[0] - crop_w)
-        y = random.randint(0, image.size[1] - crop_h)
+        # x = random.randint(0, image.size[0] - crop_w)
+        # y = random.randint(0, image.size[1] - crop_h)
 
-        image = image.crop((x, y, x + crop_w, y + crop_h))
-        depth = depth[y : y + crop_h, x : x + crop_w]
-        image_n = image_n.crop((x, y, x + crop_w, y + crop_h))
+        # image = image.crop((x, y, x + crop_w, y + crop_h))
+        # depth = depth[y : y + crop_h, x : x + crop_w]
+        # image_n = image_n.crop((x, y, x + crop_w, y + crop_h))
+
+        image = image.resize((crop_w, crop_h))
+        depth = cv2.resize(depth, (crop_w, crop_h), cv2.INTER_LINEAR)
+        image_n = image_n.resize((crop_w, crop_h))
 
         # normalize
         image_n = np.array(image_n).astype(np.float32)

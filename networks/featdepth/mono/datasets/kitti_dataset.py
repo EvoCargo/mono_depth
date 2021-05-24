@@ -285,11 +285,16 @@ class EvoDataset(KITTIDataset):
             del inputs[("color", i, -1)]
             # del inputs[("color_aug", i, -1)]
 
+        # if not self.is_train and self.gt_depth_path is not None:
+        #     gt_depth = self.gt_depths[index]
+        #     inputs['gt_depth'] = gt_depth
+
         # if self.load_depth:
-        depth_gt = self.get_depth(folder, frame_index, side, do_flip)
+        # depth_gt =
         # print('inside ', depth_gt.shape)
-        inputs["depth_gt"] = np.expand_dims(depth_gt, 0)
-        inputs["depth_gt"] = torch.from_numpy(inputs["depth_gt"].astype(np.float32))
+        inputs["gt_depth"] = self.get_depth(folder, frame_index, side, do_flip)
+        # inputs["gt_depth"] = np.expand_dims(depth_gt, 0)
+        inputs["gt_depth"] = torch.from_numpy(inputs["gt_depth"].astype(np.float32))
 
         # if "s" in self.frame_idxs:
         #     stereo_T = np.eye(4, dtype=np.float32)

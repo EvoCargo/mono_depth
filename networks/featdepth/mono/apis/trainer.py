@@ -164,35 +164,3 @@ def _non_dist_train(model, dataset_train, dataset_val, cfg, validate=False):
     # elif cfg.load_from:
     #     runner.load_checkpoint(cfg.load_from)
     runner.run(data_loaders, cfg.workflow, cfg.total_epochs)
-
-
-# def _dist_train(model, dataset_train, dataset_val, cfg, validate=False):
-#     # prepare data loaders
-#     data_loaders = [
-#         build_dataloader(dataset_train, cfg.imgs_per_gpu, cfg.workers_per_gpu, dist=True)
-#     ]
-#     # put model on gpus
-#     model = MMDistributedDataParallel(model.cuda())
-#     # build runner
-#     optimizer = build_optimizer(model, cfg.optimizer)
-#     print('cfg work dir is ', cfg.work_dir)
-#     runner = EpochBasedRunner(
-#         model, batch_processor, optimizer, cfg.work_dir, cfg.log_level
-#     )
-#     # register hooks
-#     optimizer_config = DistOptimizerHook(**cfg.optimizer_config)
-#     runner.register_training_hooks(
-#         cfg.lr_config, optimizer_config, cfg.checkpoint_config, cfg.log_config
-#     )
-#     runner.register_hook(DistSamplerSeedHook())
-#     # register eval hooks
-#     if validate:
-#         print('validate........................')
-#         interval = cfg.get('validate_interval', 1)
-#         runner.register_hook(DistEvalMonoHook(dataset_val, interval, cfg))
-
-#     if cfg.resume_from:
-#         runner.resume(cfg.resume_from)
-#     elif cfg.load_from:
-#         runner.load_checkpoint(cfg.load_from)
-#     runner.run(data_loaders, cfg.workflow, cfg.total_epochs)

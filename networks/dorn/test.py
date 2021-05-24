@@ -2,29 +2,14 @@
 # # -*- coding: utf-8 -*-
 
 # import argparse
-# import copy
+
+# # import copy
 # import logging
-# import os
-# import sys
-# import time
+
+# # import os
+# # import sys
+# # import time
 # import warnings
-
-# import torch
-# from tqdm import tqdm
-
-
-# warnings.filterwarnings("ignore")
-# logging.basicConfig(
-#     format='[%(asctime)s %(levelname)s] %(message)s',
-#     datefmt='%m/%d/%Y %H:%M:%S',
-#     level=logging.INFO,
-# )
-
-# # sys.path.append(os.path.abspath(".."))
-# sys.path.insert(0, os.path.abspath(".."))
-
-# # running in parent dir
-# os.chdir("..")
 
 # from dp.core.solver import Solver
 # from dp.datasets.loader import build_loader
@@ -37,23 +22,41 @@
 #     compose_preds,
 #     kb_crop_preds,
 # )
-# from dp.visualizers import build_visualizer
 
+
+# # import torch
+# # from tqdm import tqdm
+
+# # sys.path.append(os.path.abspath(".."))
+# # sys.path.insert(0, os.path.abspath(".."))
+
+# # # running in parent dir
+# # os.chdir("..")
+
+
+# # from dp.visualizers import build_visualizer
+
+# warnings.filterwarnings("ignore")
+# logging.basicConfig(
+#     format='[%(asctime)s %(levelname)s] %(message)s',
+#     datefmt='%m/%d/%Y %H:%M:%S',
+#     level=logging.INFO,
+# )
 
 # parser = argparse.ArgumentParser(description='Training script')
 # parser.add_argument('-i', '--image', type=str)
 # parser.add_argument('-m', '--model', type=str)
 # parser.add_argument('-o', '--output', type=str)
-# # separate the path-related config items in another file
-# # parser.add_argument('-r', '--resumed', type=str, default=None, required=False)
-# # parser.add_argument("--local_rank", default=0, type=int)
-# # options for outputing visualization
-# # parser.add_argument("--vpath", type=str, default="vis")
-# # parser.add_argument("--vrgb", action="store_true", help="visualize rgb input images")
-# # parser.add_argument("--vdepth", action="store_true", help="visualize depth gt and predictions")
-# # parser.add_argument("--vmask", action="store_true", help="visualize which pixels are counted in quantitative results")
-# # parser.add_argument("--vrange", action="store_true", help="visualize range mask image which shows rough distance distribution")
-# # parser.add_argument("--vnormal", action="store_true", help="visualize surface normal predictions")
+# # # separate the path-related config items in another file
+# # # parser.add_argument('-r', '--resumed', type=str, default=None, required=False)
+# # # parser.add_argument("--local_rank", default=0, type=int)
+# # # options for outputing visualization
+# # # parser.add_argument("--vpath", type=str, default="vis")
+# # # parser.add_argument("--vrgb", action="store_true", help="visualize rgb input images")
+# # # parser.add_argument("--vdepth", action="store_true", help="visualize depth gt and predictions")
+# # # parser.add_argument("--vmask", action="store_true", help="visualize which pixels are counted in quantitative results")
+# # # parser.add_argument("--vrange", action="store_true", help="visualize range mask image which shows rough distance distribution")
+# # # parser.add_argument("--vnormal", action="store_true", help="visualize surface normal predictions")
 
 
 # args = parser.parse_args()
@@ -61,215 +64,215 @@
 # solver = Solver()
 
 # # read config
-# if args.resumed:
-#     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-#     continue_state_object = torch.load(args.resumed, map_location=torch.device("cpu"))
-#     config = continue_state_object['config']
-#     ### Minghan: only use this line when the trained model and the evaluation is not on the same machine
-#     if args.config:
-#         override_cfg = load_config(args.config)
-#         config.update(override_cfg)
+# # if args.resumed:
+# #     # device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# #     continue_state_object = torch.load(args.resumed, map_location=torch.device("cpu"))
+# #     config = continue_state_object['config']
+# #     ### Minghan: only use this line when the trained model and the evaluation is not on the same machine
+# #     if args.config:
+# #         override_cfg = load_config(args.config)
+# #         config.update(override_cfg)
 
-#     solver.init_from_checkpoint(continue_state_object=continue_state_object)
-#     if is_main_process:
-#         snap_dir = args.resumed[: -len(args.resumed.split('/')[-1])]
-#         if not os.path.exists(snap_dir):
-#             logging.error('[Error] {} is not existed.'.format(snap_dir))
-#             raise FileNotFoundError
-# else:
-#     config = load_config(args.config)
-#     pathcfg = load_config(args.pathcfg)
-#     config = merge_config(config, pathcfg)
-
-#     solver.init_from_scratch(config)
-#     if is_main_process:
-#         exp_time = time.strftime('%Y_%m_%d_%H_%M_%S', time.localtime())
-#         if isinstance(config['data']['name'], list):
-#             snap_dir = os.path.join(
-#                 config["snap"]["path"],
-#                 config['data']['name'][0],
-#                 config['model']['name'],
-#                 exp_time,
-#             )
-#         else:
-#             snap_dir = os.path.join(
-#                 config["snap"]["path"],
-#                 config['data']['name'],
-#                 config['model']['name'],
-#                 exp_time,
-#             )
-#         if not os.path.exists(snap_dir):
-#             os.makedirs(snap_dir)
-
-# ##### modification of the config for testing
-# config_left = copy.deepcopy(config)
-# config_right = copy.deepcopy(config)
-# config_left["data"]["te_crop_mode"] = "bottom_left"
-# config_right["data"]["te_crop_mode"] = "bottom_right"
-
-# # if is_main_process:
-# #     print_config(config)
-
-# # dataset
-# # tr_loader, sampler, niter_per_epoch = build_loader(config, True, solver.world_size, solver.distributed)
-# # te_loader, _, niter_test = build_loader(config, False, solver.world_size, solver.distributed)
-
-# te_loader_l, _, niter_test_l = build_loader(
-#     config_left, False, solver.world_size, solver.distributed
-# )
-# te_loader_r, _, niter_test_r = build_loader(
-#     config_right, False, solver.world_size, solver.distributed
-# )
-# assert niter_test_l == niter_test_r, "{} {}".format(niter_test_l, niter_test_r)
-# niter_test = niter_test_l
-
-# dataset_name = config["data"]["name"][1]
-# """
-#     usage: debug
-# """
-# # niter_per_epoch, niter_test = 200, 20
-
-# # loss_meter = AverageMeter()
-# # metric = build_metrics(config)
-# ### Metrix from c3d
-# # if dataset_name == "Kitti":
-# #     metric = Metrics(d_min=1e-3, d_max=80, shape_unify="kb_crop", eval_crop="garg_crop")
-# # elif dataset_name == "vKitti2":
-# #     metric = Metrics(d_min=1e-3, d_max=80, shape_unify=None, eval_crop="vkitti2", adjust_mean=False, batch_adjust_mean=2.66)  ### for vkitti2
+# #     solver.init_from_checkpoint(continue_state_object=continue_state_object)
+# #     if is_main_process:
+# #         snap_dir = args.resumed[: -len(args.resumed.split('/')[-1])]
+# #         if not os.path.exists(snap_dir):
+# #             logging.error('[Error] {} is not existed.'.format(snap_dir))
+# #             raise FileNotFoundError
 # # else:
-# #     raise ValueError("data name {} not recognized".format(dataset_name))
-# # mean_tracker = AverageMeter()   ### mean_tracker is to tell whether the scale has any overall shift compared with GT depth
+# config = load_config(args.config)
+# # pathcfg = load_config(args.pathcfg)
+# # config = merge_config(config, pathcfg)
+
+# #     solver.init_from_scratch(config)
+# #     if is_main_process:
+# #         exp_time = time.strftime('%Y_%m_%d_%H_%M_%S', time.localtime())
+# #         if isinstance(config['data']['name'], list):
+# #             snap_dir = os.path.join(
+# #                 config["snap"]["path"],
+# #                 config['data']['name'][0],
+# #                 config['model']['name'],
+# #                 exp_time,
+# #             )
+# #         else:
+# #             snap_dir = os.path.join(
+# #                 config["snap"]["path"],
+# #                 config['data']['name'],
+# #                 config['model']['name'],
+# #                 exp_time,
+# #             )
+# #         if not os.path.exists(snap_dir):
+# #             os.makedirs(snap_dir)
+
+# # ##### modification of the config for testing
+# # config_left = copy.deepcopy(config)
+# # config_right = copy.deepcopy(config)
+# # config_left["data"]["te_crop_mode"] = "bottom_left"
+# # config_right["data"]["te_crop_mode"] = "bottom_right"
+
+# # # if is_main_process:
+# # #     print_config(config)
+
+# # # dataset
+# # # tr_loader, sampler, niter_per_epoch = build_loader(config, True, solver.world_size, solver.distributed)
+# # # te_loader, _, niter_test = build_loader(config, False, solver.world_size, solver.distributed)
+
+# # te_loader_l, _, niter_test_l = build_loader(
+# #     config_left, False, solver.world_size, solver.distributed
+# # )
+# # te_loader_r, _, niter_test_r = build_loader(
+# #     config_right, False, solver.world_size, solver.distributed
+# # )
+# # assert niter_test_l == niter_test_r, "{} {}".format(niter_test_l, niter_test_r)
+# # niter_test = niter_test_l
+
+# # dataset_name = config["data"]["name"][1]
+# # """
+# #     usage: debug
+# # """
+# # # niter_per_epoch, niter_test = 200, 20
+
+# # # loss_meter = AverageMeter()
+# # # metric = build_metrics(config)
+# # ### Metrix from c3d
+# # # if dataset_name == "Kitti":
+# # #     metric = Metrics(d_min=1e-3, d_max=80, shape_unify="kb_crop", eval_crop="garg_crop")
+# # # elif dataset_name == "vKitti2":
+# # #     metric = Metrics(d_min=1e-3, d_max=80, shape_unify=None, eval_crop="vkitti2", adjust_mean=False, batch_adjust_mean=2.66)  ### for vkitti2
+# # # else:
+# # #     raise ValueError("data name {} not recognized".format(dataset_name))
+# # # mean_tracker = AverageMeter()   ### mean_tracker is to tell whether the scale has any overall shift compared with GT depth
+# # # if is_main_process:
+# # #     writer = create_summary_writer(snap_dir)
+# # #     visualizer = build_visualizer(config, writer)
+
+# # normal_gener = NormalFromDepthDense()
+# # # if args.vpcl:
+# # #     pcl_viewer = pcl_load_viewer_fromfile()
+
+# # epoch = config['solver']['epochs']
+# # solver.after_epoch()
+
+# # header_row = '{:10s} {} {:6s} {:6s} {:6s}'.format(
+# #     "Iter", metric.get_header_row(), "IO", "Inf", "Cmp"
+# # )
+# # print(header_row)
+# # row_fmt = '{:10s} {} {:6.2f} {:6.2f} {:6.2f}'
+
+# # # validation
 # # if is_main_process:
-# #     writer = create_summary_writer(snap_dir)
-# #     visualizer = build_visualizer(config, writer)
+# #     bar_format = '{desc}[{elapsed}<{remaining},{rate_fmt}]'
+# #     pbar = tqdm(range(niter_test), file=sys.stdout, bar_format=bar_format)
+# # else:
+# #     pbar = range(niter_test)
+# # metric.reset()
+# # test_iter_l = iter(te_loader_l)
+# # test_iter_r = iter(te_loader_r)
+# # for idx in pbar:
+# #     t_start = time.time()
+# #     minibatch_l = test_iter_l.next()
+# #     filtered_kwargs_l = solver.parse_kwargs(minibatch_l)
+# #     minibatch_r = test_iter_r.next()
+# #     filtered_kwargs_r = solver.parse_kwargs(minibatch_r)
 
-# normal_gener = NormalFromDepthDense()
-# # if args.vpcl:
-# #     pcl_viewer = pcl_load_viewer_fromfile()
+# #     # print(filtered_kwargs)
+# #     t_end = time.time()
+# #     io_time = t_end - t_start
+# #     t_start = time.time()
+# #     pred_l = solver.step_no_grad(**filtered_kwargs_l)
+# #     pred_r = solver.step_no_grad(**filtered_kwargs_r)
+# #     d_pred_l = pred_l["target"][-1]  # B*H*W
+# #     d_pred_r = pred_r["target"][-1]  # B*H*W
 
-# epoch = config['solver']['epochs']
-# solver.after_epoch()
+# #     full_width = minibatch_l["depth_full"].shape[
+# #         -1
+# #     ]  # minibatch_l["depth_full"].shape=(B*H*W)
+# #     full_height = minibatch_l["depth_full"].shape[-2]
+# #     pred_full = compose_preds(d_pred_l, d_pred_r, full_width, full_height)
+# #     pred_kb_crop = kb_crop_preds(pred_full)  # B*H*W
 
-# header_row = '{:10s} {} {:6s} {:6s} {:6s}'.format(
-#     "Iter", metric.get_header_row(), "IO", "Inf", "Cmp"
-# )
-# print(header_row)
-# row_fmt = '{:10s} {} {:6.2f} {:6.2f} {:6.2f}'
+# #     t_end = time.time()
+# #     inf_time = t_end - t_start
 
-# # validation
-# if is_main_process:
-#     bar_format = '{desc}[{elapsed}<{remaining},{rate_fmt}]'
-#     pbar = tqdm(range(niter_test), file=sys.stdout, bar_format=bar_format)
-# else:
-#     pbar = range(niter_test)
-# metric.reset()
-# test_iter_l = iter(te_loader_l)
-# test_iter_r = iter(te_loader_r)
-# for idx in pbar:
-#     t_start = time.time()
-#     minibatch_l = test_iter_l.next()
-#     filtered_kwargs_l = solver.parse_kwargs(minibatch_l)
-#     minibatch_r = test_iter_r.next()
-#     filtered_kwargs_r = solver.parse_kwargs(minibatch_r)
+# #     t_start = time.time()
+# #     ### remove batch dim
+# #     pred_crop_hw = pred_kb_crop[0]
+# #     pred_full_hw = pred_full[0]
+# #     gt_full_hw = minibatch_l["depth_full"][0]
+# #     # if dataset_name == "Kitti":
+# #     #     extra_dict = metric.compute_metric(pred_crop_hw, gt_full_hw)
+# #     # elif dataset_name == "vKitti2":
+# #     #     extra_dict = metric.compute_metric(pred_full_hw, gt_full_hw)     # for vkitti2
+# #     # else:
+# #     #     raise ValueError("data name {} not recognized".format(dataset_name))
+# #     t_end = time.time()
+# #     cmp_time = t_end - t_start
 
-#     # print(filtered_kwargs)
-#     t_end = time.time()
-#     io_time = t_end - t_start
-#     t_start = time.time()
-#     pred_l = solver.step_no_grad(**filtered_kwargs_l)
-#     pred_r = solver.step_no_grad(**filtered_kwargs_r)
-#     d_pred_l = pred_l["target"][-1]  # B*H*W
-#     d_pred_r = pred_r["target"][-1]  # B*H*W
+# #     mean_tracker.update(extra_dict['mean_pred'] / extra_dict['mean_gt'])
 
-#     full_width = minibatch_l["depth_full"].shape[
-#         -1
-#     ]  # minibatch_l["depth_full"].shape=(B*H*W)
-#     full_height = minibatch_l["depth_full"].shape[-2]
-#     pred_full = compose_preds(d_pred_l, d_pred_r, full_width, full_height)
-#     pred_kb_crop = kb_crop_preds(pred_full)  # B*H*W
+# #     #################################################### visualization
+# #     if args.vmask:
+# #         ### visualize mask showing pixels included in quantitative result
+# #         mask = extra_dict['mask']
+# #         img_mask = uint8_np_from_img_tensor(mask.unsqueeze(0))
+# #         save_np_to_img(img_mask, "{}/{}_mask".format(args.vpath, idx))
 
-#     t_end = time.time()
-#     inf_time = t_end - t_start
+# #     if args.vrange:
+# #         ## visualize range-indicating mask of ground truth and predictions, again it is to tell whether the scale has any overall shift compared with GT depth
+# #         gt_5 = gt_full_hw <= 5
+# #         gt_10 = gt_full_hw <= 10
+# #         gt_20 = gt_full_hw <= 20
+# #         gt_51020 = torch.stack([gt_5, gt_10, gt_20], 0)
+# #         img_mask = uint8_np_from_img_tensor(gt_51020)
+# #         save_np_to_img(img_mask, "{}/{}_mask_gt51020".format(args.vpath, idx))
 
-#     t_start = time.time()
-#     ### remove batch dim
-#     pred_crop_hw = pred_kb_crop[0]
-#     pred_full_hw = pred_full[0]
-#     gt_full_hw = minibatch_l["depth_full"][0]
-#     # if dataset_name == "Kitti":
-#     #     extra_dict = metric.compute_metric(pred_crop_hw, gt_full_hw)
-#     # elif dataset_name == "vKitti2":
-#     #     extra_dict = metric.compute_metric(pred_full_hw, gt_full_hw)     # for vkitti2
-#     # else:
-#     #     raise ValueError("data name {} not recognized".format(dataset_name))
-#     t_end = time.time()
-#     cmp_time = t_end - t_start
+# #         gt_5 = pred_full <= 5
+# #         gt_10 = pred_full <= 10
+# #         gt_20 = pred_full <= 20
+# #         gt_51020 = torch.cat([gt_5, gt_10, gt_20], 0)
+# #         img_mask = uint8_np_from_img_tensor(gt_51020)
+# #         save_np_to_img(img_mask, "{}/{}_mask_pred51020".format(args.vpath, idx))
 
-#     mean_tracker.update(extra_dict['mean_pred'] / extra_dict['mean_gt'])
+# #     if args.vrgb:
+# #         ### visualize rgb image
+# #         img_full = minibatch_l["image_full"][0]
+# #         img_kb_crop = kb_crop_preds(img_full)
+# #         img_full_np = uint8_np_from_img_tensor(img_full)
+# #         save_np_to_img(img_full_np, "{}/{}_rgb".format(args.vpath, idx))
 
-#     #################################################### visualization
-#     if args.vmask:
-#         ### visualize mask showing pixels included in quantitative result
-#         mask = extra_dict['mask']
-#         img_mask = uint8_np_from_img_tensor(mask.unsqueeze(0))
-#         save_np_to_img(img_mask, "{}/{}_mask".format(args.vpath, idx))
+# #     if args.vdepth:
+# #         ### visualize predictions
+# #         vis_pred = vis_depth(pred_full)
+# #         vis_pred = uint8_np_from_img_tensor(vis_pred)
+# #         vis_gt = vis_depth(minibatch_l["depth_full"])
+# #         vis_gt = uint8_np_from_img_tensor(vis_gt)
+# #         save_np_to_img(vis_pred, "{}/{}_pred".format(args.vpath, idx))
+# #         save_np_to_img(vis_gt, "{}/{}_gt".format(args.vpath, idx))
 
-#     if args.vrange:
-#         ## visualize range-indicating mask of ground truth and predictions, again it is to tell whether the scale has any overall shift compared with GT depth
-#         gt_5 = gt_full_hw <= 5
-#         gt_10 = gt_full_hw <= 10
-#         gt_20 = gt_full_hw <= 20
-#         gt_51020 = torch.stack([gt_5, gt_10, gt_20], 0)
-#         img_mask = uint8_np_from_img_tensor(gt_51020)
-#         save_np_to_img(img_mask, "{}/{}_mask_gt51020".format(args.vpath, idx))
+# #     if args.vnormal:
+# #         ### generate normal image
+# #         # cam_info_kb = minibatch_l["cam_info_kb_crop"]
+# #         # normal_pred = normal_gener(pred_kb_crop.unsqueeze(1), cam_info_kb.K)
+# #         cam_info_full = minibatch_l["cam_info_full"]
+# #         normal_pred = normal_gener(pred_full.unsqueeze(1), cam_info_full.K)
+# #         vis_normal_pred = vis_normal(normal_pred)
+# #         vis_normal_pred = uint8_np_from_img_tensor(vis_normal_pred)
+# #         save_np_to_img(vis_normal_pred, "{}/{}_normal".format(args.vpath, idx))
 
-#         gt_5 = pred_full <= 5
-#         gt_10 = pred_full <= 10
-#         gt_20 = pred_full <= 20
-#         gt_51020 = torch.cat([gt_5, gt_10, gt_20], 0)
-#         img_mask = uint8_np_from_img_tensor(gt_51020)
-#         save_np_to_img(img_mask, "{}/{}_mask_pred51020".format(args.vpath, idx))
+# #     if is_main_process:
 
-#     if args.vrgb:
-#         ### visualize rgb image
-#         img_full = minibatch_l["image_full"][0]
-#         img_kb_crop = kb_crop_preds(img_full)
-#         img_full_np = uint8_np_from_img_tensor(img_full)
-#         save_np_to_img(img_full_np, "{}/{}_rgb".format(args.vpath, idx))
-
-#     if args.vdepth:
-#         ### visualize predictions
-#         vis_pred = vis_depth(pred_full)
-#         vis_pred = uint8_np_from_img_tensor(vis_pred)
-#         vis_gt = vis_depth(minibatch_l["depth_full"])
-#         vis_gt = uint8_np_from_img_tensor(vis_gt)
-#         save_np_to_img(vis_pred, "{}/{}_pred".format(args.vpath, idx))
-#         save_np_to_img(vis_gt, "{}/{}_gt".format(args.vpath, idx))
-
-#     if args.vnormal:
-#         ### generate normal image
-#         # cam_info_kb = minibatch_l["cam_info_kb_crop"]
-#         # normal_pred = normal_gener(pred_kb_crop.unsqueeze(1), cam_info_kb.K)
-#         cam_info_full = minibatch_l["cam_info_full"]
-#         normal_pred = normal_gener(pred_full.unsqueeze(1), cam_info_full.K)
-#         vis_normal_pred = vis_normal(normal_pred)
-#         vis_normal_pred = uint8_np_from_img_tensor(vis_normal_pred)
-#         save_np_to_img(vis_normal_pred, "{}/{}_normal".format(args.vpath, idx))
-
-#     if is_main_process:
-
-#         print_str = row_fmt.format(
-#             "{}/{}".format(idx + 1, niter_test),
-#             metric.get_snapshot_row(),
-#             io_time,
-#             inf_time,
-#             cmp_time,
-#         )
-#         pbar.set_description(print_str, refresh=False)
+# #         print_str = row_fmt.format(
+# #             "{}/{}".format(idx + 1, niter_test),
+# #             metric.get_snapshot_row(),
+# #             io_time,
+# #             inf_time,
+# #             cmp_time,
+# #         )
+# #         pbar.set_description(print_str, refresh=False)
 
 
-# # if is_main_process:
-# #     print(metric.get_header_row())
-# #     print(metric.get_result_row())
+# # # if is_main_process:
+# # #     print(metric.get_header_row())
+# # #     print(metric.get_result_row())
 
-# # print("Mean pred/gt ratio:", mean_tracker.mean())
+# # # print("Mean pred/gt ratio:", mean_tracker.mean())
