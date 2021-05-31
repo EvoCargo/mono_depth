@@ -16,14 +16,14 @@ model:
     pretrained: True
 data:
   name: "evo"
-  split: ['train', 'finaleval']
+  split: ['train', 'val']
   path: '/media/data/datasets/bag_depth'
   tr_crop_size: [288, 512]
   te_crop_size: [288, 512]
   norm_type: "norm"
 solver:
   epochs: 30
-  batch_size: 1
+  batch_size: 2
   step_decay: 1
   optimizer:
     name: 'SGD'

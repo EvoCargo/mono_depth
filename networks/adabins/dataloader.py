@@ -140,6 +140,7 @@ class DataLoadPreprocess(Dataset):
             sample = {'image': image, 'depth': depth_gt, 'focal': focal}
 
         else:
+            original_size = Image.open(image_path).size
             image = (
                 np.asarray(
                     Image.open(image_path).resize(
@@ -171,8 +172,9 @@ class DataLoadPreprocess(Dataset):
                     'depth': depth_gt,
                     'focal': focal,
                     'has_valid_depth': has_valid_depth,
-                    'image_path': sample_path.split()[0],
-                    'depth_path': sample_path.split()[1],
+                    'image_path': image_path,
+                    'depth_path': depth_path,
+                    'original_size': original_size,
                 }
             else:
                 sample = {'image': image, 'focal': focal}
@@ -261,6 +263,7 @@ class ToTensor(object):
                 'has_valid_depth': has_valid_depth,
                 'image_path': sample['image_path'],
                 'depth_path': sample['depth_path'],
+                'original_size': sample['original_size'],
             }
 
     def to_tensor(self, pic):

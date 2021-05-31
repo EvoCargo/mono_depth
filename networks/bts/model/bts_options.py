@@ -180,66 +180,6 @@ class BTSOptions:
             default='',
         )
 
-        # Features I don't need
-        # self.parser.add_argument(
-        #     '--gpu',
-        #     type=int,
-        #     help='GPU id to use.',
-        #     default=None
-        # )
-        # self.parser.add_argument(
-        #     '--multiprocessing_distributed',
-        #     help='Use multi-processing distributed training to launch '
-        #     'N processes per node, which has N GPUs. This is the '
-        #     'fastest way to use PyTorch for either single node or '
-        #     'multi node data parallel training',
-        #     action='store_true',
-        # )
-        # self.parser.add_argument(
-        #     '--eigen_crop',
-        #     help='if set, crops according to Eigen NIPS14',
-        #     action='store_true'
-        # )
-        # self.parser.add_argument(
-        #     '--garg_crop',
-        #     help='if set, crops according to Garg  ECCV16',
-        #     action='store_true'
-        # )
-        # self.parser.add_argument(
-        #     '--do_kb_crop',
-        #     help='if set, crop input images as kitti benchmark images',
-        #     action='store_true',
-        # )
-        # self.parser.add_argument(
-        #     '--use_right',
-        #     help='if set, will randomly use right images when train on KITTI',
-        #     action='store_true',
-        # )
-        # self.parser.add_argument(
-        #     '--world_size',
-        #     type=int,
-        #     help='number of nodes for distributed training',
-        #     default=1
-        # )
-        # self.parser.add_argument(
-        #     '--rank',
-        #     type=int,
-        #     help='node rank for distributed training',
-        #     default=0
-        # )
-        # self.parser.add_argument(
-        #     '--dist_url',
-        #     type=str,
-        #     help='url used to set up distributed training',
-        #     default='tcp://127.0.0.1:1234',
-        # )
-        # self.parser.add_argument(
-        #     '--dist_backend',
-        #     type=str,
-        #     help='distributed backend',
-        #     default='nccl'
-        # )
-
     def parse(self):
         arg_filename_with_prefix = '@' + sys.argv[1]
         self.opts = self.parser.parse_args([arg_filename_with_prefix])

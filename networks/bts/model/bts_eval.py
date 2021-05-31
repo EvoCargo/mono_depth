@@ -1,6 +1,5 @@
 from __future__ import absolute_import, division, print_function
 
-import argparse
 import os
 import sys
 import time
@@ -9,100 +8,23 @@ import cv2
 import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
-
-# import torch.nn.utils as utils
-# import torchvision.utils as vutils
 from bts import BtsModel
 from bts_dataloader import BtsDataLoader
+from bts_options import BTSOptions
 from tensorboardX import SummaryWriter
 from torch.autograd import Variable
 
 
-def convert_arg_line_to_args(arg_line):
-    for arg in arg_line.split():
-        if not arg.strip():
-            continue
-        yield arg
+options = BTSOptions()
+opts = options.parse()
 
-
-parser = argparse.ArgumentParser(
-    description='BTS PyTorch implementation.', fromfile_prefix_chars='@'
-)
-parser.convert_arg_line_to_args = convert_arg_line_to_args
-
-parser.add_argument('--model_name', type=str, help='model name', default='bts_v0_0_1')
-parser.add_argument(
-    '--encoder',
-    type=str,
-    help='type of encoder, desenet121_bts or densenet161_bts',
-    default='densenet161_bts',
-)
-parser.add_argument('--data_path', type=str, help='path to the data', required=True)
-parser.add_argument(
-    '--gt_path', type=str, help='path to the groundtruth data', required=False
-)
-parser.add_argument(
-    '--filenames_file', type=str, help='path to the filenames text file', required=True
-)
-parser.add_argument('--input_height', type=int, help='input height', default=480)
-parser.add_argument('--input_width', type=int, help='input width', default=640)
-parser.add_argument(
-    '--max_depth', type=float, help='maximum depth in estimation', default=80
-)
-parser.add_argument(
-    '--output_directory',
-    type=str,
-    help='output directory for summary, if empty outputs to checkpoint folder',
-    default='',
-)
-parser.add_argument(
-    '--checkpoint_path',
-    type=str,
-    help='path to a specific checkpoint to load',
-    default='',
-)
-parser.add_argument(
-    '--dataset', type=str, help='dataset to train on, make3d or nyudepthv2', default='nyu'
-)
-parser.add_argument(
-    '--eigen_crop', help='if set, crops according to Eigen NIPS14', action='store_true'
-)
-parser.add_argument(
-    '--garg_crop', help='if set, crops according to Garg  ECCV16', action='store_true'
-)
-
-parser.add_argument(
-    '--min_depth_eval', type=float, help='minimum depth for evaluation', default=1e-3
-)
-parser.add_argument(
-    '--max_depth_eval', type=float, help='maximum depth for evaluation', default=80
-)
-parser.add_argument(
-    '--do_kb_crop',
-    help='if set, crop input images as kitti benchmark images',
-    action='store_true',
-)
-parser.add_argument(
-    '--bts_size', type=int, help='initial num_filters in bts', default=512
-)
-
-if sys.argv.__len__() == 2:
-    arg_filename_with_prefix = '@' + sys.argv[1]
-    args = parser.parse_args([arg_filename_with_prefix])
-else:
-    args = parser.parse_args()
-
-model_dir = os.path.dirname(args.checkpoint_path)
+model_dir = os.path.dirname(opts.checkpoint_path)
 sys.path.append(model_dir)
-
-for key, val in vars(__import__(args.model_name)).items():
-    if key.startswith('__') and key.endswith('__'):
-        continue
-    vars()[key] = val
 
 
 def compute_errors(gt, pred):
     thresh = np.maximum((gt / pred), (pred / gt))
+
     d1 = (thresh < 1.25).mean()
     d2 = (thresh < 1.25 ** 2).mean()
     d3 = (thresh < 1.25 ** 3).mean()
@@ -140,18 +62,19 @@ def test(params):
     write_summary = False
     steps = set()
 
-    if os.path.isdir(args.checkpoint_path):
+    if os.path.isdir(opts.checkpoint_path):
         import glob
 
-        models = [f for f in glob.glob(args.checkpoint_path + "/model*")]
+        models = [f for f in glob.glob(opts.checkpoint_path + "/model*")]
 
         for model in models:
+            # print(model)
             step = model.split('-')[-1]
             steps.add('{:06d}'.format(int(step)))
 
         lines = []
-        if os.path.exists(args.checkpoint_path + '/evaluated_checkpoints'):
-            with open(args.checkpoint_path + '/evaluated_checkpoints') as file:
+        if os.path.exists(opts.checkpoint_path + '/evaluated_checkpoints'):
+            with open(opts.checkpoint_path + '/evaluated_checkpoints') as file:
                 lines = file.readlines()
 
         for line in lines:
@@ -159,24 +82,23 @@ def test(params):
                 steps.remove(line.rstrip())
 
         steps = sorted(steps)
-        if args.output_directory != '':
-            summary_path = os.path.join(args.output_directory, args.model_name)
+        if opts.log_directory != '':
+            summary_path = os.path.join(opts.log_directory, opts.model_name)
         else:
-            summary_path = os.path.join(args.checkpoint_path, 'eval')
+            summary_path = os.path.join(opts.checkpoint_path, 'eval')
 
         write_summary = True
     else:
-        steps.add('{:06d}'.format(int(args.checkpoint_path.split('-')[-1])))
+        steps.add('{:06d}'.format(int(opts.checkpoint_path.split('-')[-1])))
 
     if len(steps) == 0:
         print('No new model to evaluate. Abort.')
         return
 
-    args.mode = 'test'
-    dataloader = BtsDataLoader(args, 'eval')
+    opts.mode = 'test'
+    dataloader = BtsDataLoader(opts, 'test')
 
     model = BtsModel(params=params)
-    # model = nn.DataParallel(model)
 
     cudnn.benchmark = True
 
@@ -184,21 +106,21 @@ def test(params):
         summary_writer = SummaryWriter(summary_path, flush_secs=30)
 
     for step in steps:
-        if os.path.isdir(args.checkpoint_path):
+        if os.path.isdir(opts.checkpoint_path):
             checkpoint = torch.load(
-                os.path.join(args.checkpoint_path, 'model-' + str(int(step)))
+                os.path.join(opts.checkpoint_path, 'model-' + str(int(step)))
             )
             model.load_state_dict(checkpoint['model'])
         else:
-            checkpoint = torch.load(args.checkpoint_path)
+            checkpoint = torch.load(opts.checkpoint_path)
             model.load_state_dict(checkpoint['model'])
 
         model.eval()
         model.cuda()
 
-        num_test_samples = get_num_lines(args.filenames_file)
+        num_test_samples = get_num_lines(opts.filenames_file)
 
-        with open(args.filenames_file) as f:
+        with open(opts.filenames_file) as f:
             lines = f.readlines()
 
         print('now testing {} files for step {}'.format(num_test_samples, step))
@@ -210,8 +132,6 @@ def test(params):
             for _, sample in enumerate(dataloader.data):
                 image = Variable(sample['image'].cuda())
                 focal = Variable(sample['focal'].cuda())
-                # image = Variable(sample['image'])
-                # focal = Variable(sample['focal'])
                 # Predict
                 lpg8x8, lpg4x4, lpg2x2, reduc1x1, depth_est = model(image, focal)
                 pred_depths.append(depth_est.cpu().numpy().squeeze())
@@ -222,18 +142,16 @@ def test(params):
 
         if len(gt_depths) == 0:
             for t_id in range(num_test_samples):
-                gt_depth_path = os.path.join(args.gt_path, lines[t_id].split()[1])
+
+                splitted = lines[t_id].split()
+
+                gt_depth_path = os.path.join(
+                    opts.data_path,
+                    splitted[0],
+                    'front_depth_left',
+                    splitted[0] + '_' + splitted[1] + '.png',
+                )
                 depth = cv2.imread(gt_depth_path, -1)
-                if depth is None:
-                    print('Missing: %s ' % gt_depth_path)
-                    missing_ids.add(t_id)
-                    continue
-
-                if args.dataset == 'nyu':
-                    depth = depth.astype(np.float32) / 1000.0
-                else:
-                    depth = depth.astype(np.float32) / 256.0
-
                 gt_depths.append(depth)
 
         print('Computing errors')
@@ -254,7 +172,7 @@ def test(params):
             summary_writer.flush()
 
             with open(
-                os.path.dirname(args.checkpoint_path) + '/evaluated_checkpoints', 'a'
+                os.path.dirname(opts.checkpoint_path) + '/evaluated_checkpoints', 'a'
             ) as file:
                 file.write(step + '\n')
 
@@ -262,16 +180,7 @@ def test(params):
 
 
 def eval(pred_depths, step):
-    num_samples = get_num_lines(args.filenames_file)
-    pred_depths_valid = []
-
-    for t_id in range(num_samples):
-        if t_id in missing_ids:
-            continue
-
-        pred_depths_valid.append(pred_depths[t_id])
-
-    num_samples = num_samples - len(missing_ids)
+    num_samples = get_num_lines(opts.filenames_file)
 
     silog = np.zeros(num_samples, np.float32)
     log10 = np.zeros(num_samples, np.float32)
@@ -284,48 +193,30 @@ def eval(pred_depths, step):
     d3 = np.zeros(num_samples, np.float32)
 
     for i in range(num_samples):
+
         gt_depth = gt_depths[i]
-        pred_depth = pred_depths_valid[i]
-
-        if args.do_kb_crop:
-            height, width = gt_depth.shape
-            top_margin = int(height - 352)
-            left_margin = int((width - 1216) / 2)
-            pred_depth_uncropped = np.zeros((height, width), dtype=np.float32)
-            pred_depth_uncropped[
-                top_margin : top_margin + 352, left_margin : left_margin + 1216
-            ] = pred_depth
-            pred_depth = pred_depth_uncropped
-
-        pred_depth[pred_depth < args.min_depth_eval] = args.min_depth_eval
-        pred_depth[pred_depth > args.max_depth_eval] = args.max_depth_eval
-        pred_depth[np.isinf(pred_depth)] = args.max_depth_eval
-        pred_depth[np.isnan(pred_depth)] = args.min_depth_eval
-
-        valid_mask = np.logical_and(
-            gt_depth > args.min_depth_eval, gt_depth < args.max_depth_eval
+        cv2.imwrite(f'/home/penitto/mono_depth/networks/bts/log/tstP{i}.png', gt_depth)
+        pred_depth = cv2.resize(
+            pred_depths[i],
+            (gt_depths[i].shape[1], gt_depths[i].shape[0]),
+            cv2.INTER_LINEAR,
         )
 
-        if args.garg_crop or args.eigen_crop:
-            gt_height, gt_width = gt_depth.shape
-            eval_mask = np.zeros(valid_mask.shape)
+        # alt_gt_depth = gt_depths[i]
+        # alt_pred_depth = F.interpolate(
+        #     pred_depths[i],
+        #     size=gt_depths[i].shape,
+        #     mode="bilinear",
+        #     align_corners=True)
 
-            if args.garg_crop:
-                eval_mask[
-                    int(0.40810811 * gt_height) : int(0.99189189 * gt_height),
-                    int(0.03594771 * gt_width) : int(0.96405229 * gt_width),
-                ] = 1
+        pred_depth[pred_depth < opts.min_depth_eval] = opts.min_depth_eval
+        pred_depth[pred_depth > opts.max_depth_eval] = opts.max_depth_eval
+        pred_depth[np.isinf(pred_depth)] = opts.max_depth_eval
+        pred_depth[np.isnan(pred_depth)] = opts.min_depth_eval
 
-            elif args.eigen_crop:
-                if args.dataset == 'kitti':
-                    eval_mask[
-                        int(0.3324324 * gt_height) : int(0.91351351 * gt_height),
-                        int(0.0359477 * gt_width) : int(0.96405229 * gt_width),
-                    ] = 1
-                else:
-                    eval_mask[45:471, 41:601] = 1
-
-            valid_mask = np.logical_and(valid_mask, eval_mask)
+        valid_mask = np.logical_and(
+            gt_depth > opts.min_depth_eval, gt_depth < opts.max_depth_eval
+        )
 
         (
             silog[i],
@@ -362,4 +253,4 @@ def eval(pred_depths, step):
 
 
 if __name__ == '__main__':
-    test(args)
+    test(opts)

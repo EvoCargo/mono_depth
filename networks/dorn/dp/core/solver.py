@@ -28,12 +28,6 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
-# try:
-#     from apex import amp
-#     from apex.parallel import DistributedDataParallel, convert_syncbn_model
-# except ImportError:
-#     raise ImportError("Please install apex from https://www.github.com/nvidia/apex .")
-
 
 class Solver(object):
     def __init__(self):
@@ -41,31 +35,12 @@ class Solver(object):
         :param config: easydict
         """
         self.version = __version__
-        # logging.info("PyTorch Version {}, Solver Version {}".format(torch.__version__, self.version))
-        # self.distributed = False
-        # self.world_size = 1
-        # self.local_rank = 0
         self.epoch = 0
         self.iteration = 0
         self.config = None
         self.model, self.optimizer, self.lr_policy = None, None, None
         self.step_decay = 1
         self.filtered_keys = None
-
-        # if 'WORLD_SIZE' in os.environ:
-        #     self.world_size = int(os.environ['WORLD_SIZE'])
-        #     self.distributed = self.world_size > 1 or torch.cuda.device_count() > 1
-
-        # if self.distributed:
-        #     dist.init_process_group(backend="nccl", init_method='env://')
-        #     self.local_rank = dist.get_rank()
-        #     torch.cuda.set_device(self.local_rank)
-        #     logging.info(
-        #         '[distributed mode] world size: {}, local rank: {}.'.format(
-        #             self.world_size, self.local_rank
-        #         )
-        #     )
-        # else:
         logging.info('[Single GPU mode]')
 
     def _build_environ(self):
@@ -75,11 +50,6 @@ class Solver(object):
             torch.set_printoptions(precision=10)
         else:
             cudnn.benchmark = True
-
-        # if self.config['apex']:
-        #     assert (
-        #         torch.backends.cudnn.enabled
-        #     ), "Amp requires cudnn backend to be enabled."
 
         # set random seed
         torch.manual_seed(self.config['environ']['seed'])
@@ -131,30 +101,6 @@ class Solver(object):
             load_model(self.model, config['model']['pretrained_model'])
 
         self.model.cuda(0)
-
-        # if self.distributed:
-        #     self.model = convert_syncbn_model(self.model)
-
-        # if self.config['apex']['amp_used']:
-        #     # Initialize Amp.  Amp accepts either values or strings for the optional override arguments,
-        #     # for convenient interoperation with argparse.
-        #     logging.info(
-        #         "Initialize Amp. opt level={}, keep batchnorm fp32={}, loss_scale={}.".format(
-        #             self.config['apex']['opt_level'],
-        #             self.config['apex']['keep_batchnorm_fp32'],
-        #             self.config['apex']['loss_scale'],
-        #         )
-        #     )
-        #     self.model, self.optimizer = amp.initialize(
-        #         self.model,
-        #         self.optimizer,
-        #         opt_level=self.config['apex']['opt_level'],
-        #         keep_batchnorm_fp32=self.config['apex']["keep_batchnorm_fp32"],
-        #         loss_scale=self.config['apex']["loss_scale"],
-        #     )
-        # if self.distributed:
-        #     self.model = DistributedDataParallel(self.model)
-
         t_end = time.time()
         logging.info(
             "Init trainer from scratch, Time usage: IO: {}".format(t_end - t_start)
@@ -167,7 +113,7 @@ class Solver(object):
         self._build_environ()
         self.model = _get_model(self.config)
         self.filtered_keys = [
-            p.name for p in inspect.signature(self.model).parameters.values()
+            p.name for p in inspect.signature(self.model.forward).parameters.values()
         ]
         # model_params = filter(lambda p: p.requires_grad, self.model.parameters())
         model_params = []
@@ -186,31 +132,6 @@ class Solver(object):
         load_model(self.model, continue_state_object['model'])
         self.model.cuda(0)
 
-        # if self.distributed:
-        #     self.model = convert_syncbn_model(self.model)
-
-        # if self.config['apex']['amp_used']:
-        #     # Initialize Amp.  Amp accepts either values or strings for the optional override arguments,
-        #     # for convenient interoperation with argparse.
-        #     logging.info(
-        #         "Initialize Amp. opt level={}, keep batchnorm fp32={}, loss_scale={}.".format(
-        #             self.config['apex']['opt_level'],
-        #             self.config['apex']['keep_batchnorm_fp32'],
-        #             self.config['apex']['loss_scale'],
-        #         )
-        #     )
-        #     self.model, self.optimizer = amp.initialize(
-        #         self.model,
-        #         self.optimizer,
-        #         opt_level=self.config['apex']['opt_level'],
-        #         keep_batchnorm_fp32=self.config['apex']["keep_batchnorm_fp32"],
-        #         loss_scale=self.config['apex']["loss_scale"],
-        #     )
-        #     amp.load_state_dict(continue_state_object['amp'])
-
-        # if self.distributed:
-        #     self.model = DistributedDataParallel(self.model)
-
         self.optimizer.load_state_dict(continue_state_object['optimizer'])
         self.lr_policy.load_state_dict(continue_state_object['lr_policy'])
 
@@ -218,7 +139,7 @@ class Solver(object):
         self.epoch = continue_state_object['epoch']
         self.iteration = continue_state_object["iteration"]
 
-        del continue_state_object
+        # del continue_state_object
         t_end = time.time()
         logging.info(
             "Init trainer from checkpoint, Time usage: IO: {}".format(t_end - t_start)
@@ -238,12 +159,6 @@ class Solver(object):
         self.iteration += 1
         loss = self.model(**kwargs)
         loss /= self.step_decay
-
-        # backward
-        # if self.distributed and self.config['apex']['amp_used']:
-        #     with amp.scale_loss(loss, self.optimizer) as scaled_loss:
-        #         scaled_loss.backward()
-        # else:
         loss.backward()
 
         if self.iteration % self.step_decay == 0:
@@ -253,9 +168,6 @@ class Solver(object):
             self.optimizer.zero_grad()
             self.lr_policy.step(self.epoch)
 
-        # if self.distributed:
-        #     reduced_loss = reduce_tensor(loss.data, self.world_size)
-        # else:
         reduced_loss = loss.data
         return reduced_loss
 
@@ -279,8 +191,6 @@ class Solver(object):
         torch.cuda.empty_cache()
 
     def save_checkpoint(self, path):
-        # if self.local_rank == 0:
-        # logging.info("Saving checkpoint to file {}".format(path))
         t_start = time.time()
 
         state_dict = {}
@@ -294,8 +204,6 @@ class Solver(object):
                 key = k[7:]
             new_state_dict[key] = v
 
-        # if self.config['apex']['amp_used']:
-        #     state_dict['amp'] = amp.state_dict()
         state_dict['config'] = self.config
         state_dict['model'] = new_state_dict
         state_dict['optimizer'] = self.optimizer.state_dict()

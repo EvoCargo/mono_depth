@@ -86,10 +86,7 @@ class DataLoadPreprocess(Dataset):
 
         splitted = sample_path.split()
 
-        if self.args.dataset == 'kitti':
-            focal = float(splitted[2])
-        else:
-            focal = float(splitted[3])
+        focal = float(splitted[3])
 
         image_path = os.path.join(
             self.args.data_path,
@@ -142,6 +139,7 @@ class DataLoadPreprocess(Dataset):
             sample = {'image': image, 'depth': depth_gt, 'focal': focal}
 
         else:
+            original_size = Image.open(image_path).size
             image = (
                 np.asarray(
                     Image.open(image_path).resize(
@@ -172,6 +170,7 @@ class DataLoadPreprocess(Dataset):
                 'depth': depth_gt,
                 'focal': focal,
                 'has_valid_depth': has_valid_depth,
+                'original_size': original_size,
             }
         if self.transform:
             sample = self.transform(sample)
@@ -241,7 +240,11 @@ class ToTensor(object):
         image = self.normalize(image)
 
         if self.mode == 'test':
-            return {'image': image, 'focal': focal}
+            return {
+                'image': image,
+                'focal': focal,
+                'original_size': sample['original_size'],
+            }
 
         depth = sample['depth']
         if self.mode == 'train':

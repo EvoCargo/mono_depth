@@ -7,7 +7,10 @@ import sys
 import time
 import warnings
 
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
+import torch.nn.functional as F
 from dp.core.solver import Solver
 from dp.datasets.loader import build_loader
 from dp.metircs import build_metrics
@@ -53,6 +56,7 @@ if args.resumed:
     if not os.path.exists(snap_dir):
         logging.error('[Error] {} is not existed.'.format(snap_dir))
         raise FileNotFoundError
+    config['data']['split'] = ['train', 'finaleval']
 else:
     config = load_config(args.config)
     solver.init_from_scratch(config)
@@ -98,7 +102,6 @@ for epoch in range(solver.epoch + 1, config['solver']['epochs'] + 1):
         t_start = time.time()
         minibatch = next(train_iter)
         filtered_kwargs = solver.parse_kwargs(minibatch)
-        # print(filtered_kwargs)
         t_end = time.time()
         io_time = t_end - t_start
         t_start = time.time()
@@ -142,6 +145,8 @@ for epoch in range(solver.epoch + 1, config['solver']['epochs'] + 1):
         t_end = time.time()
         io_time = t_end - t_start
         t_start = time.time()
+        # print(filtered_kwargs.keys())
+        # print(minibatch['image'].shape)
         pred = solver.step_no_grad(**filtered_kwargs)
         t_end = time.time()
         inf_time = t_end - t_start
@@ -160,6 +165,21 @@ for epoch in range(solver.epoch + 1, config['solver']['epochs'] + 1):
             + ' Inf:%.2f' % inf_time
             + ' Cmp:%.2f' % cmp_time
         )
+        pred_path = f'/home/penitto/mono_depth/networks/dorn/{idx}.png'
+        # print(pred['target'][-1].cpu().numpy().shape)
+        pred_resized = (
+            F.interpolate(
+                pred['target'][-1].unsqueeze(0),
+                (minibatch['original_size']),
+                mode="bilinear",
+                align_corners=False,
+            )
+            .squeeze()
+            .cpu()
+            .numpy()
+        )
+        vmax = np.percentile(pred_resized, 95)
+        plt.imsave(pred_path, pred_resized, cmap='magma', vmax=vmax)
         pbar.set_description(print_str, refresh=False)
         """
         visualization for model output and feature maps.

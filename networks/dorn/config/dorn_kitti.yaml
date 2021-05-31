@@ -14,7 +14,7 @@ model:
     pyramid: [8, 12, 16]
     batch_norm: False
     discretization: "SID"
-    pretrained: False
+    pretrained: True
 data:
   name: "kitti"
   split: ["trainval", "selected_val"]

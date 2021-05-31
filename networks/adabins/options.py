@@ -166,6 +166,18 @@ class AdabinsOptions:
             help='maximum depth for evaluation',
             default=10,
         )
+        self.parser.add_argument(
+            '--save_dir',
+            default=None,
+            type=str,
+            help='Store predictions in folder',
+        )
+        self.parser.add_argument(
+            '--checkpoint_path',
+            type=str,
+            required=True,
+            help="checkpoint file to use for prediction",
+        )
 
     def parse(self):
         arg_filename_with_prefix = '@' + sys.argv[1]

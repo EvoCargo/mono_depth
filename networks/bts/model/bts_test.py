@@ -7,7 +7,8 @@ import sys
 import time
 
 import cv2
-import matplotlib.pyplot as plt
+
+# import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
@@ -51,12 +52,13 @@ def test(params):
     model.cuda()
 
     num_params = sum([np.prod(p.size()) for p in model.parameters()])
+    # print('Parameters ', sum(p.numel() for p in model.parameters()))
     print("Total number of parameters: {}".format(num_params))
 
     num_test_samples = get_num_lines(opts.filenames_file)
 
-    # with open(args.filenames_file) as f:
-    #     lines = f.readlines()
+    with open(params.filenames_file) as f:
+        lines = f.readlines()
 
     print('now testing {} files with {}'.format(num_test_samples, opts.checkpoint_path))
 
@@ -98,22 +100,32 @@ def test(params):
                 raise
 
     for s in tqdm(range(num_test_samples)):
+        scene_name = lines[s].split()[0]
         filename_pred_png = (
-            save_name + '/raw/' + opts.image_path.split('/')[-1].replace('.jpg', '.png')
+            save_name + '/raw/' + scene_name + '_' + lines[s].split()[1] + '_bts.png'
         )
-        filename_cmap_png = (
-            save_name + '/cmap/' + opts.image_path.split('/')[-1].replace('.jpg', '.png')
-        )
-        filename_image_png = save_name + '/rgb/' + opts.image_path.split('/')[-1]
 
-        rgb_path = params['image_path']
-        image = cv2.imread(rgb_path)
+        # rgb_path = params['image_path']
+        image = cv2.imread(
+            os.path.join(
+                params.data_path,
+                scene_name,
+                'front_rgb_left',
+                scene_name + '_' + lines[s].split()[1] + '.jpg',
+            )
+        )
 
         pred_depth = pred_depths[s]
-        pred_8x8 = pred_8x8s[s]
-        pred_4x4 = pred_4x4s[s]
-        pred_2x2 = pred_2x2s[s]
-        pred_1x1 = pred_1x1s[s]
+        # pred_resized = torch.nn.functional.interpolate(
+        #     torch.from_numpy(pred_depth).unsqueeze(0).unsqueeze(0), (image.shape[:2]), mode="bilinear", align_corners=False
+        # ).squeeze().cpu().numpy()
+        # pred_8x8 = pred_8x8s[s]
+        # pred_4x4 = pred_4x4s[s]
+        # pred_2x2 = pred_2x2s[s]
+        # pred_1x1 = pred_1x1s[s]
+
+        # vmax = np.percentile(pred_resized, 95)
+        # plt.imsave(filename_pred_png, pred_resized, cmap='magma', vmax=vmax)
 
         # pred_depth_scaled = pred_depth.astype(np.uint16)
         cv2.imwrite(
@@ -121,18 +133,6 @@ def test(params):
             pred_depth.astype(np.uint16),
             [cv2.IMWRITE_PNG_COMPRESSION, 0],
         )
-
-        if opts.save_lpg:
-            cv2.imwrite(filename_image_png, image[10 : -1 - 9, 10 : -1 - 9, :])
-            plt.imsave(filename_cmap_png, np.log10(pred_depth), cmap='Greys')
-            filename_lpg_cmap_png = filename_cmap_png.replace('.png', '_8x8.png')
-            plt.imsave(filename_lpg_cmap_png, np.log10(pred_8x8), cmap='Greys')
-            filename_lpg_cmap_png = filename_cmap_png.replace('.png', '_4x4.png')
-            plt.imsave(filename_lpg_cmap_png, np.log10(pred_4x4), cmap='Greys')
-            filename_lpg_cmap_png = filename_cmap_png.replace('.png', '_2x2.png')
-            plt.imsave(filename_lpg_cmap_png, np.log10(pred_2x2), cmap='Greys')
-            filename_lpg_cmap_png = filename_cmap_png.replace('.png', '_1x1.png')
-            plt.imsave(filename_lpg_cmap_png, np.log10(pred_1x1), cmap='Greys')
 
     return
 

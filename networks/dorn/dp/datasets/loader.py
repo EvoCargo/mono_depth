@@ -87,10 +87,6 @@ def build_loader(config, is_train=True):
     batch_size = config['solver']['batch_size'] if is_train else 1
     niters_per_epoch = int(np.ceil(dataset.get_length() // batch_size))
 
-    # if distributed:
-    #     sampler = DistributedSampler(dataset)
-    #     batch_size = batch_size // world_size
-
     if is_train:
         loader = DataLoader(
             dataset,

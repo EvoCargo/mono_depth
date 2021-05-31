@@ -175,8 +175,8 @@ class InferenceHelper:
 def main(image, model, **args):
     img = Image.open(image)
     # start = time()
-    if img.size[0] > 720:
-        img = img.resize((720, 540), Image.ANTIALIAS)
+    # if img.size[0] > 720:
+    #     img = img.resize((720, 540), Image.ANTIALIAS)
     inferHelper = InferenceHelper(pretrained_path=model)
     centers, pred = inferHelper.predict_pil(img)
     # print(f"took :{time() - start}s")

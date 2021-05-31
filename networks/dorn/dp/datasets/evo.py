@@ -112,7 +112,7 @@ class evo(BaseDataset):
         image = normalize(image, type=self.config['norm_type'])
         image = image.transpose(2, 0, 1)
 
-        output_dict = {"image_n": image_n}
+        output_dict = {"image_n": image_n, 'original_size': (H, W)}
 
         # print('Test:', image.shape)
 

@@ -153,6 +153,7 @@ pretrained/
 log/
 wandb/
 snaps/
+snaps_ev/
 
 # Model weights
 *.pt
