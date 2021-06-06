@@ -32,7 +32,7 @@ There are 3 datasets available for our task:
 
 # Train 🚂
 
-Detailed information about train and other is available in [networks](.networks) folder.
+Detailed information about train and other is available in [networks](./networks) folder.
 
 All pretrained models are [here](https://drive.google.com/drive/folders/184grgoiV4IqAgJ_M0_Fkk9FB_v975RSq?usp=sharing). You can download it with
 
