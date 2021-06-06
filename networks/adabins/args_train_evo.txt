@@ -1,0 +1,25 @@
+--batch_size 3
+--mode train
+--dataset evo
+--learning_rate 0.000357
+--weight_decay 0.1
+--div_factor 25
+--final_div_factor 100
+--epochs 25
+--workers 2
+--name UnetAdaptiveBins
+--n_bins 256
+--norm linear
+--w_chamfer 0.1
+--data_path /media/data/datasets/bag_depth
+--filenames_file ./train_test_inputs/evo/train_files.txt
+--input_height 288
+--input_width 512
+--min_depth 2
+--max_depth 117
+--do_random_rotate
+--log_dir log
+--degree 1.0
+--filenames_file_eval ./train_test_inputs/evo/val_files.txt
+--min_depth_eval 2
+--max_depth_eval 117

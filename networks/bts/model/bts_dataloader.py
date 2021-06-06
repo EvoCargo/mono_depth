@@ -4,8 +4,6 @@ import random
 import cv2
 import numpy as np
 import torch
-
-# from distributed_sampler_no_evenly_divisible import DistributedSamplerNoEvenlyDivisible
 from PIL import Image
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms

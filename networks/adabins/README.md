@@ -1,17 +1,21 @@
 # AdaBins
 
-## Pretrained
+## Train
 
-Download pretrained model with `download_model.py` in root
+To train network `train.py` was used with arguments from `args_train_evo.txt`:
 
 ```
-python download_model.py --network adabins --model kitti
+python train.py args_train_evo.txt
+```
+
+## Evaluate
+
+To eval network use:
+
+```
+python evaluate.py args_test_evo.txt
 ```
 
 ## Inference
 
-Инференс заводится через
-
-```bash
-python infer.py --model ./pretrained/kitti/kitti.pth --image /path/to/image
-```
+Inference image can be done with `infer.py` file, but we used `evaluate.py` file for it.

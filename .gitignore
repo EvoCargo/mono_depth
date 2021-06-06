@@ -78,7 +78,7 @@ target/
 
 # Jupyter Notebook
 .ipynb_checkpoints
-*.ipynb
+# *.ipynb
 
 # IPython
 profile_default/
@@ -132,8 +132,9 @@ dmypy.json
 .pyre/
 
 # Files-lists for downloads datasets
-*.txt
+# *.txt
 *.list
+eval_imgs/
 
 # Big files
 *.npy

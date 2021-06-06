@@ -2,26 +2,13 @@
 
 ## How to
 
-To train network from scratch on KITTI use:
+We trained our network with such arguments:
 
 ```bash
-python train.py --model_name mono_model --data_path /media/data/datasets/penitto/kitti --png \
---split benchmark --batch_size 8 --height 128 --width 416 --dataset kitti_depth
+python train.py --model_name evo_scratch --height 288 --width 512 --data_path /media/data/datasets/bag_depth --split evo --dataset evo --num_epochs 30 --batch_size 4 --num_layers 50
 ```
 
-To train network from scratch on Evo use:
-
-```bash
-python train.py --model_name mono_model --data_path /media/data/datasets/bag_depth \
---split evo --batch_size ? --height ? --width ? --dataset evo
-```
-
-To finetune evo:
-
-```bash
-python train.py --model_name finetuned --data_path /media/data/datasets/bag_depth --load_weights_folder pretrained/mono_640x192 --dataset evo --split evo \
---height 192 --width 640 --batch_size 8
-```
+For more info about training and evaluation arguments check [options](./options.py) file.
 
 To evaluate evo:
 
@@ -36,116 +23,4 @@ You can predict depth for a single image with:
 python test_simple.py --image assets/test_image.jpg --model pretrained/mono_640x192
 ```
 
-On its first run this will download the `mono+stereo_640x192` pretrained model (99MB) into the `models/` folder.
-We provide the following  options for `--model_name`:
-
-
-| `--model_name`          | Training modality | Imagenet pretrained? | Model resolution  | KITTI abs. rel. error |  delta < 1.25  |
-|-------------------------|-------------------|--------------------------|-----------------|------|----------------|
-| [`mono_640x192`](https://storage.googleapis.com/niantic-lon-static/research/monodepth2/mono_640x192.zip)          | Mono              | Yes | 640 x 192                | 0.115                 | 0.877          |
-| [`stereo_640x192`](https://storage.googleapis.com/niantic-lon-static/research/monodepth2/stereo_640x192.zip)        | Stereo            | Yes | 640 x 192                | 0.109                 | 0.864          |
-| [`mono+stereo_640x192`](https://storage.googleapis.com/niantic-lon-static/research/monodepth2/mono%2Bstereo_640x192.zip)   | Mono + Stereo     | Yes | 640 x 192                | 0.106                 | 0.874          |
-| [`mono_1024x320`](https://storage.googleapis.com/niantic-lon-static/research/monodepth2/mono_1024x320.zip)         | Mono              | Yes | 1024 x 320               | 0.115                 | 0.879          |
-| [`stereo_1024x320`](https://storage.googleapis.com/niantic-lon-static/research/monodepth2/stereo_1024x320.zip)       | Stereo            | Yes | 1024 x 320               | 0.107                 | 0.874          |
-| [`mono+stereo_1024x320`](https://storage.googleapis.com/niantic-lon-static/research/monodepth2/mono%2Bstereo_1024x320.zip)  | Mono + Stereo     | Yes | 1024 x 320               | 0.106                 | 0.876          |
-| [`mono_no_pt_640x192`](https://storage.googleapis.com/niantic-lon-static/research/monodepth2/mono_no_pt_640x192.zip)          | Mono              | No | 640 x 192                | 0.132                 | 0.845          |
-| [`stereo_no_pt_640x192`](https://storage.googleapis.com/niantic-lon-static/research/monodepth2/stereo_no_pt_640x192.zip)        | Stereo            | No | 640 x 192                | 0.130                 | 0.831          |
-| [`mono+stereo_no_pt_640x192`](https://storage.googleapis.com/niantic-lon-static/research/monodepth2/mono%2Bstereo_no_pt_640x192.zip)   | Mono + Stereo     | No | 640 x 192                | 0.127                 | 0.836          |
-
-
-## 💾 KITTI training data
-
-You can download the entire [raw KITTI dataset](http://www.cvlibs.net/datasets/kitti/raw_data.php) by running:
-```bash
-wget -i splits/kitti_archives_to_download.txt -P kitti_data/
-```
-Then unzip with
-```bash
-cd kitti_data
-unzip "*.zip"
-cd ..
-```
-**Warning:** it weighs about **175GB**, so make sure you have enough space to unzip too!
-
-**Splits**
-
-The train/test/validation splits are defined in the `splits/` folder.
-By default, the code will train a depth model using [Zhou's subset](https://github.com/tinghuiz/SfMLearner) of the standard Eigen split of KITTI, which is designed for monocular training.
-You can also train a model using the new [benchmark split](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_prediction) or the [odometry split](http://www.cvlibs.net/datasets/kitti/eval_odometry.php) by setting the `--split` flag.
-
-## ⏳ Training
-
-By default models and tensorboard event files are saved to `~/tmp/<model_name>`.
-This can be changed with the `--log_dir` flag.
-
-
-**Monocular training:**
-```shell
-python train.py --model_name mono_model
-```
-
-
-### GPUs
-
-The code can only be run on a single GPU.
-You can specify which GPU to use with the `CUDA_VISIBLE_DEVICES` environment variable:
-```shell
-CUDA_VISIBLE_DEVICES=2 python train.py --model_name mono_model
-```
-
-All our experiments were performed on a single NVIDIA Titan Xp.
-
-| Training modality | Approximate GPU memory  | Approximate training time   |
-|-------------------|-------------------------|-----------------------------|
-| Mono              | 9GB                     | 12 hours                    |
-| Stereo            | 6GB                     | 8 hours                     |
-| Mono + Stereo     | 11GB                    | 15 hours                    |
-
-
-
-### 💽 Finetuning a pretrained model
-
-Add the following to the training command to load an existing model for finetuning:
-```shell
-python train.py --model_name finetuned_mono --load_weights_folder ~/tmp/mono_model/models/weights_19
-```
-
-## 📊 KITTI evaluation
-
-To prepare the ground truth depth maps run:
-```shell
-python export_gt_depth.py --data_path kitti_data --split eigen
-python export_gt_depth.py --data_path kitti_data --split eigen_benchmark
-```
-...assuming that you have placed the KITTI dataset in the default location of `./kitti_data/`.
-
-The following example command evaluates the epoch 19 weights of a model named `mono_model`:
-```shell
-python evaluate_depth.py --load_weights_folder ~/tmp/mono_model/models/weights_19/ --eval_mono
-```
-For stereo models, you must use the `--eval_stereo` flag (see note below):
-```shell
-python evaluate_depth.py --load_weights_folder ~/tmp/stereo_model/models/weights_19/ --eval_stereo
-```
-If you train your own model with our code you are likely to see slight differences to the publication results due to randomization in the weights initialization and data loading.
-
-An additional parameter `--eval_split` can be set.
-The three different values possible for `eval_split` are explained here:
-
-| `--eval_split`        | Test set size | For models trained with... | Description  |
-|-----------------------|---------------|----------------------------|--------------|
-| **`eigen`**           | 697           | `--split eigen_zhou` (default) or `--split eigen_full` | The standard Eigen test files |
-| **`eigen_benchmark`** | 652           | `--split eigen_zhou` (default) or `--split eigen_full`  | Evaluate with the improved ground truth from the [new KITTI depth benchmark](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_prediction) |
-| **`benchmark`**       | 500           | `--split benchmark`        | The [new KITTI depth benchmark](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_prediction) test files. |
-
-Because no ground truth is available for the new KITTI depth benchmark, no scores will be reported  when `--eval_split benchmark` is set.
-Instead, a set of `.png` images will be saved to disk ready for upload to the evaluation server.
-
-
-**External disparities evaluation**
-
-Finally you can also use `evaluate_depth.py` to evaluate raw disparities (or inverse depth) from other methods by using the `--ext_disp_to_eval` flag:
-
-```shell
-python evaluate_depth.py --ext_disp_to_eval ~/other_method_disp.npy
-```
+But we used [notebook](./depth_prediction_example.ipynb) for it.

@@ -1,10 +1,5 @@
-# import argparse
-
-# import datetime
 import os
 import sys
-
-# import threading
 import time
 
 import matplotlib
@@ -35,8 +30,6 @@ if (opts.mode == 'train') and (opts.checkpoint_path):
             continue
         vars()[key] = val
 
-
-# А что это такое?
 inv_normalize = transforms.Normalize(
     mean=torch.tensor([-0.485 / 0.229, -0.456 / 0.224, -0.406 / 0.225], device='cuda:0'),
     std=torch.tensor([1 / 0.229, 1 / 0.224, 1 / 0.225], device='cuda:0'),
@@ -279,9 +272,6 @@ def main_worker(opts):
     #     else:
     #         print("No checkpoint found at '{}'".format(opts.checkpoint_path))
 
-    # if opts.retrain:
-    #     global_step = 0
-
     cudnn.benchmark = True
 
     dataloader = BtsDataLoader(opts, 'train')
@@ -328,12 +318,7 @@ def main_worker(opts):
                 sample_batched['depth'].cuda(non_blocking=True)
             )
 
-            # print('Model.input: ', image.size(), depth_gt.size())
             lpg8x8, lpg4x4, lpg2x2, reduc1x1, depth_est = model(image, focal)
-            # print('Estimated stats: ', depth_est.min().data, depth_est.max().data, depth_est.std().data, depth_est.mean().data)
-            # print('True stats: ', depth_gt.min().data, depth_gt.max().data, depth_gt.std().data, depth_gt.mean().data)
-
-            # print('Model output: ', depth_est.size())
 
             mask = depth_gt > 1.0
 
@@ -347,16 +332,6 @@ def main_worker(opts):
 
             optimizer.step()
 
-            # print(
-            #     '[epoch][s/s_per_e/gs]: [{}][{}/{}/{}], lr: {:.12f}, loss: {:.12f}'.format(
-            #         epoch, step, steps_per_epoch, global_step, current_lr, loss
-            #     )
-            # )
-            # if np.isnan(loss.cpu().item()):
-            #     print('NaN in loss occurred. Aborting training.')
-            #     return -1
-
-            # Какой-то лог
             if global_step and global_step % opts.log_freq == 0:
                 time_sofar = (time.time() - start_time) / 3600
                 training_time_left = (num_total_steps / global_step - 1.0) * time_sofar
@@ -509,14 +484,6 @@ def main():
         os.system(command)
 
     torch.cuda.empty_cache()
-
-    # if opts.do_online_eval:
-    #     print("You have specified --do_online_eval.")
-    #     print(
-    #         "This will evaluate the model every eval_freq {} steps and save best models for individual eval metrics.".format(
-    #             opts.eval_freq
-    #         )
-    #     )
 
     main_worker(opts)
 

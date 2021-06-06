@@ -2,7 +2,7 @@
 
 Hi! In this repo we will try to solve monocular depth estimation problem for our autonomous selfdriving car ([Check it out!](https://evocargo.com/eng/)).
 
-All results would be introduced in our [paper](https://www.overleaf.com/read/hzvkhgckssjz) (view only).
+All results are introduced in our [paper](https://drive.google.com/file/d/1DCW-Ywv0ISlMtBxqlFlMSEWG69QKtBMr/view?usp=sharing).
 
 Don't forget to set your environment with [this guide](HOW_TO_SET_ENV.md).
 
@@ -32,13 +32,9 @@ There are 3 datasets available for our task:
 
 # Train 🚂
 
-Detailed information about train and other is available in [network](.network) folder.
+Detailed information about train and other is available in [networks](.networks) folder.
 
-All pretrained models are [here](https://drive.google.com/drive/folders/184grgoiV4IqAgJ_M0_Fkk9FB_v975RSq?usp=sharing).
-
-Here is the table of pretrains which you can use in train script with `--pretrained` arg.
-
-All this pretrains you can download via
+All pretrained models are [here](https://drive.google.com/drive/folders/184grgoiV4IqAgJ_M0_Fkk9FB_v975RSq?usp=sharing). You can download it with
 
 ```bash
 python download_model.py --network monodepth2 --model mono_640x192

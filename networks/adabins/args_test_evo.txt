@@ -1,0 +1,14 @@
+--n_bins 256
+--save_dir /home/penitto/mono_depth/networks/adabins/new_eval
+--log_dir /home/penitto/mono_depth/networks/adabins/new_log
+--dataset evo
+--data_path /media/data/datasets/bag_depth
+--filenames_file /home/penitto/mono_depth/eval_imgs/ev_img.txt
+--filenames_file_eval /home/penitto/mono_depth/eval_imgs/ev_img.txt
+--input_height 288
+--input_width 512
+--min_depth 2
+--max_depth 117
+--min_depth_eval 2
+--max_depth_eval 117
+--checkpoint_path /media/data/datasets/penitto/networks/adabins/log/checkpoints/UnetAdaptiveBins_24-May_23-30-nodebs3-tep25-lr0.000357-wd0.1-b96d0f70-340b-49e2-ab1c-104a983f2552_best.pt

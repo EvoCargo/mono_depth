@@ -1,0 +1,14 @@
+--mode test
+--model_name bts_evo
+--encoder resnet50
+--dataset evo
+--data_path /media/data/datasets/bag_depth/
+--filenames_file /home/penitto/mono_depth/eval_imgs/ev_img.txt
+--filenames_file_eval /home/penitto/mono_depth/eval_imgs/ev_img.txt
+--input_height 288
+--input_width 512
+--max_depth 117
+--min_depth 2
+--min_depth_eval 2
+--max_depth_eval 117
+--checkpoint_path /media/data/datasets/penitto/networks/bts/models/model-13

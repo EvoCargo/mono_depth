@@ -1,0 +1,30 @@
+--mode train
+--model_name bts_eigen_v2_pytorch_test
+--encoder resnet50_bts
+--dataset kitti
+--data_path /media/data/datasets/penitto/kitti/
+--gt_path /media/data/datasets/penitto/kitti/
+--filenames_file ../train_test_inputs/eigen_train_files_with_gt.txt
+--batch_size 4
+--num_epochs 50
+--learning_rate 1e-4
+--weight_decay 1e-2
+--adam_eps 1e-3
+--num_threads 4
+--input_height 128
+--input_width 416
+--max_depth 80
+--do_kb_crop
+--do_random_rotate
+--degree 10.0
+--log_directory ../log
+
+--log_freq 100
+--do_online_eval
+--eval_freq 200
+--data_path_eval /media/data/datasets/penitto/kitti/
+--gt_path_eval /media/data/datasets/penitto/kitti/
+--filenames_file_eval ../train_test_inputs/eigen_test_files_with_gt.txt
+--min_depth_eval 1e-3
+--max_depth_eval 80
+--eval_summary_directory ./models/eval/
