@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-
-
 from .lr_schedulers import (
     ConstantLR,
     CosineAnnealingLR,

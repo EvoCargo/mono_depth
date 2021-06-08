@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 from torch.optim import SGD, Adam
 from torch.optim.adadelta import Adadelta
 from torch.optim.adagrad import Adagrad

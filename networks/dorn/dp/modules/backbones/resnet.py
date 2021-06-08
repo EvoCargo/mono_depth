@@ -1,6 +1,3 @@
-#!/usr/bin/python3
-# -*- coding: utf-8 -*-
-
 import torch
 import torch.nn as nn
 from torch.nn import BatchNorm2d
@@ -178,7 +175,7 @@ class ResNetBackbone(nn.Module):
             #     map_location='cuda:0'
             # )
             saved_state_dict = torch.load(
-                '/home/penitto/mono_depth/networks/dorn/pretrained/resnet/resnet101_v1c.pth',
+                '/home/penitto/mono_depth/networks/dorn/backbones/resnet/resnet101_v1c.pth',
                 map_location="cuda:0",
             )
             new_params = self.backbone.state_dict().copy()
